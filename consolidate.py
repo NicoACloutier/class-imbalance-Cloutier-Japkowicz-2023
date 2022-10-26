@@ -1,15 +1,38 @@
 import re
 import pandas as pd
 
+select = lambda value_list, selection_list, minimum_value: [value for (i, value) in enumerate(value_list) if selection_list[i] > minimum_value]
+
 def main():
     with open('raw.txt', 'r', encoding='utf8') as f:
         text = f.read()
         text = re.sub('\n[A-Z]\n', '', text) #delete lines with only single uppercase letter (these lines denote the beginning of a new letter, not useful)
-        words = re.findall('(?<=\n).+?(?= \– )', text) #get all of the words in the text, in the format (\nWORD - ).
-        definitions = re.findall('(?<= \– ).+?(?=\n)', text) #get all of the definitions in the text, in the format ( - DEFINITION\n).
+        words = re.findall('(?<=\n).+?(?= \– )', text) #get words, in format (\nWORD - ).
+        definitions = re.findall('(?<= \– ).+?(?=\n)', text) #get definitions, in format ( - DEFINITION\n).
     
-    word_series = pd.DataFrame([words, definitions], ["Words", "Definitions"]).transpose()
-    word_series.to_csv('words.csv', index=False)
+    df = pd.read_csv('..\\data.csv') #read data (must be in file named data.csv in parent to current directory)
+    
+    appearances_list = [] #list of appearances of each word
+    averaged_values = {'hateful': [], 'offensive': [],
+                       'sentiment': [], 'violent': []} #values to be averaged for each word and recorded in df
+    for i, word in enumerate(words):
+        line_df = df[df['text'].str.contains(f'[,\.\s\?]{word}s?[,\.\s\?]', case=False)] #make df of lines with word appearing in it\
+        appearances = len(line_df) #get number of appearances for word
+        appearances_list.append(appearances)
+        if appearances > 0:
+            for key in averaged_values:
+                avg = sum(line_df[key]) / appearances
+                averaged_values[key].append(avg)
+    
+    words = select(words, appearances_list, 0)
+    definitions = select(definitions, appearances_list, 0)
+    appearances_list = select(appearances_list, appearances_list, 0)
+    
+    word_df = pd.DataFrame([words, definitions, appearances_list], ["word", "definition", "appearance"]).transpose()
+    for key in averaged_values:
+        word_df[key] = averaged_values[key]
+    
+    word_df.to_csv('words.csv', index=False)
 
 if __name__ == '__main__':
     main()
