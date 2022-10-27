@@ -632,6 +632,6 @@ NPC – “Non-playable character, used to describe an aloof out-group”
 
 Shekel – “Israeli currency”
 
-Israel – “”
+Israel – None
 
-Zionist – “”
+Zionist – None
