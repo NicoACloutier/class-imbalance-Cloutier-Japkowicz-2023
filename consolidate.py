@@ -31,14 +31,17 @@ def main():
                 avg = sum(line_df[key]) / appearances
                 averaged_values[key].append(avg)
     
+    #get rid of words/definitions that have appearance values of 0
     words = select(words, appearances_list, 0)
     definitions = select(definitions, appearances_list, 0)
     appearances_list = select(appearances_list, appearances_list, 0)
     
+    #write data to df
     word_df = pd.DataFrame([words, definitions, appearances_list], ["word", "definition", "appearances"]).transpose()
     for key in averaged_values:
         word_df[key] = averaged_values[key]
     
+    #sort descending by # of appearances
     word_df = word_df.sort_values('appearances', ascending=False)
     
     word_df.to_csv('words.csv', index=False)
