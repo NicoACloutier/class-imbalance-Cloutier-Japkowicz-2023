@@ -17,7 +17,7 @@ def main():
         words += temp_words #add to total words
         definitions += ['None'] * len(temp_words) #add 'None' definitions to words
     
-    df = pd.read_csv('..\\data.csv') #read data (must be in file named data.csv in parent to current directory)
+    df = pd.read_csv('cleaned_data.csv') #read data
     
     appearances_list = [] #list of appearances of each word
     averaged_values = {'hateful': [], 'offensive': [],
