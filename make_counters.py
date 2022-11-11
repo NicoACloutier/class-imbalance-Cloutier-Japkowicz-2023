@@ -18,11 +18,11 @@ def to_df(text_counter, column1, column2):
 
 #get a counter of the percentage of a text taken up by the words in that text.
 #if a baseline counter is provided to compare, subtract it.
-def get_counter(type, df, baseline=pd.DataFrame()):
+def get_counter(type, df, typename='type', baseline=pd.DataFrame()):
 
     #put the text of the rows of a certain type in a string, and get rid of stopwords
-    df = df[df['type'] == type]
-    text = ' '.join(list(df['text']))
+    df = df[df[typename] == type]
+    text = ' '.join(list(df['text'].astype(str)))
     text = text.lower()
     for stopword in nltk.corpus.stopwords.words('english'):
         text = re.sub(f' {stopword} ', ' ', text)
@@ -50,18 +50,25 @@ def main():
     df = pd.read_csv('antisemitism_dataset.csv')
     
     #reconfigure/reorganize dataframe
-    df['type_of_antisemitism'] = df['type_of_antisemitism'].apply(to_zero) #replace missing values with zero
-    df['type_of_antisemitism'] = df['type_of_antisemitism'].astype(int)
     df['classification'] = df['classification'].astype(int)
-    df['type'] = df['classification'] + df['type_of_antisemitism'] #type and classification are seperate columns, combine them
     df['text'] = df['text'].astype(str)
     df['text'] = df['text'].apply(delete_punctuation) #delete punctuation from the text
     
-    #get counters and write to file
-    baseline = get_counter(0, df) #get a baseline percentage counter (this is the counter for the non-antisemitic text)
+    #get counters and write to file for non-antisemitic text
+    baseline = get_counter(0, df, typename='classification') #get a baseline percentage counter (this is the counter for the non-antisemitic text)
     base_df = to_df(baseline, 'Words', 'Percent Appearance')
     base_df.to_csv('frequencies\\baseline.csv', index=False)
     
+    #get counters and write to file for antisemitic text
+    all_antisemitic = get_counter(1, df, typename='classification') #get a baseline percentage counter (this is the counter for the non-antisemitic text)
+    all_df = to_df(all_antisemitic, 'Words', 'Percent Appearance')
+    all_df.to_csv('frequencies\\antisemitic.csv', index=False)
+    
+    #combine type of antisemitism and classification columns
+    df['type_of_antisemitism'] = df['type_of_antisemitism'].apply(to_zero) #replace missing values with zero
+    df['type_of_antisemitism'] = df['type_of_antisemitism'].astype(int)
+    df['type'] = df['classification'] + df['type_of_antisemitism'] #type and classification are seperate columns, combine them
+
     types = range(1, 5) #remaining types of antisemitism
     for type in types:
         #make comparison counters between different types of antisemitism and

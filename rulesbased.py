@@ -4,6 +4,9 @@ import math
 import re
 import collections
 
+WORD_COLUMN = 'Words'
+PERCENT_COLUMN = 'Percent Appearance'
+
 vector_distance = lambda v1, v2: math.sqrt(sum([(v1[i]-v2[i])**2 for i, _ in enumerate(v1)])) #distance between two vectors equation
 
 #put text counter into df
@@ -90,13 +93,25 @@ def compare_vectors(text_vector, comparison_vector_dict):
     return closest
 
 #put it all together
-def compare_text(text, df, column1, column2):
-    keys = ['baseline', '1', '2', '3', '4']
+def compare_text(text, keys, df_dict=None, column1=WORD_COLUMN, column2=PERCENT_COLUMN):
     text_counter = get_text_counter(text)
     text_df = to_df(text_counter, column1, column2)
-    df_dict = dict()
-    for key in keys:
-        df_dict[key] = pd.read_csv(f'frequencies\\{key}.csv')
+    
+    #make dictionary with given keys
+    if not df_dict:
+        df_dict = dict()
+        for key in keys:
+            df_dict[key] = pd.read_csv(f'frequencies\\{key}.csv')
+    
     text_vector, comparison_vector_dict = to_vector(text_df, df_dict, column1, column2)
     closest = compare_vectors(text_vector, comparison_vector_dict)
     return closest
+
+#returns True if classified as antisemitic, False otherwise
+def is_antisemitic(text, df_dict=None):
+    return 'antisemitic' == compare_text(text, ['antisemitic', 'baseline'], df_dict=df_dict)
+
+#returns type of antisemitism predicted
+def type(text, df_dict=None):
+    types = {'1': 'political', '2': 'economic', '3': 'religious', '4': 'racial'}
+    return types[compare_text(text, ['1', '2', '3', '4'], df_dict=df_dict)]
