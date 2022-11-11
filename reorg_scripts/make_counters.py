@@ -57,12 +57,12 @@ def main():
     #get counters and write to file for non-antisemitic text
     baseline = get_counter(0, df, typename='classification') #get a baseline percentage counter (this is the counter for the non-antisemitic text)
     base_df = to_df(baseline, 'Words', 'Percent Appearance')
-    base_df.to_csv('frequencies\\baseline.csv', index=False)
+    base_df.to_csv('..\\rulesbased_model\\frequencies\\baseline.csv', index=False)
     
     #get counters and write to file for antisemitic text
     all_antisemitic = get_counter(1, df, typename='classification') #get a baseline percentage counter (this is the counter for the non-antisemitic text)
     all_df = to_df(all_antisemitic, 'Words', 'Percent Appearance')
-    all_df.to_csv('frequencies\\antisemitic.csv', index=False)
+    all_df.to_csv('..\\rulesbased_model\\frequencies\\antisemitic.csv', index=False)
     
     #combine type of antisemitism and classification columns
     df['type_of_antisemitism'] = df['type_of_antisemitism'].apply(to_zero) #replace missing values with zero
@@ -75,12 +75,12 @@ def main():
         #non-antisemitic text
         text_counter = get_counter(type, df, base_df) #make compared counter
         temp_df = to_df(text_counter, 'Words', 'Percent Increase')
-        temp_df.to_csv(f'counters\\{type}.csv', index=False)
+        temp_df.to_csv(f'..\\data\\counters\\{type}.csv', index=False)
         
         #make raw counters to be used for the rules-based model
         frequency_counter = get_counter(type, df) #make frequency counter
         temp_df = to_df(frequency_counter, 'Words', 'Percent Appearance')
-        temp_df.to_csv(f'frequencies\\{type}.csv', index=False)
+        temp_df.to_csv(f'..\\rulesbased_model\\frequencies\\{type}.csv', index=False)
 
 if __name__ == '__main__':
     main()

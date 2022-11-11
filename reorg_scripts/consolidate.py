@@ -1,23 +1,25 @@
 import re
 import pandas as pd
 
+BASIC = '..\\data'
+
 select = lambda value_list, selection_list, minimum_value: [value for (i, value) in enumerate(value_list) if selection_list[i] > minimum_value]
 
 def main():
-    with open('raw.txt', 'r', encoding='utf8') as f:
+    with open(f'{BASIC}\\raw.txt', 'r', encoding='utf8') as f:
         text = f.read()
         text = re.sub('\n[A-Z]\n', '', text) #delete lines with only single uppercase letter (these lines denote the beginning of a new letter, not useful)
         words = re.findall('(?<=\n).+?(?= \– )', text) #get words, in format (\nWORD - ).
         definitions = re.findall('(?<= \– ).+?(?=\n)', text) #get definitions, in format ( - DEFINITION\n).
     
-    with open('4chanwords.txt', 'r', encoding='utf8') as f:
+    with open(f'{BASIC}\\4chanwords.txt', 'r', encoding='utf8') as f:
         text = f.read()
         text = re.sub('\n.(?=\n)', '', text) #delete single-character lines
         temp_words = re.findall('(?<=\n).+?(?=\n)', text) #get words
         words += temp_words #add to total words
         definitions += ['None'] * len(temp_words) #add 'None' definitions to words
     
-    df = pd.read_csv('cleaned_data.csv') #read data
+    df = pd.read_csv(f'{BASIC}\\cleaned_data.csv') #read data
     
     appearances_list = [] #list of appearances of each word
     averaged_values = {'hateful': [], 'offensive': [],
@@ -44,7 +46,7 @@ def main():
     #sort descending by # of appearances
     word_df = word_df.sort_values('appearances', ascending=False)
     
-    word_df.to_csv('words.csv', index=False)
+    word_df.to_csv(f'{BASIC}\\words.csv', index=False)
 
 if __name__ == '__main__':
     main()
