@@ -109,7 +109,7 @@ def compare_text(text, keys, df_dict=None, column1=WORD_COLUMN, column2=PERCENT_
 
 #returns True if classified as antisemitic, False otherwise
 def is_antisemitic(text, df_dict=None):
-    return 'antisemitic' == compare_text(text, ['antisemitic', 'baseline'], df_dict=df_dict)
+    return 'antisemitic' == compare_text(text, ['baseline', 'antisemitic'], df_dict=df_dict)
 
 #returns type of antisemitism predicted
 def type(text, df_dict=None):

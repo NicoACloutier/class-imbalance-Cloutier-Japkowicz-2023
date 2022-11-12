@@ -5,6 +5,9 @@ import string
 import re
 import math
 
+COLUMN1 = 'Words'
+COLUMN2 = 'Percent Appearance'
+
 to_zero = lambda x: 0 if math.isnan(x) else x #set missing value to 0
 delete_punctuation = lambda x: ''.join([char for char in x if char not in string.punctuation])
 
@@ -15,6 +18,23 @@ def to_df(text_counter, column1, column2):
     output_df = pd.DataFrame([keys, values], [column1, column2]).transpose()
     output_df = output_df.sort_values(column2, ascending=False) #sort
     return output_df
+
+#get counter from only text
+def get_text_counter(text):
+    text = text.lower()
+    for stopword in nltk.corpus.stopwords.words('english'):
+        text = re.sub(f' {stopword} ', ' ', text)
+    
+    #get a counter of the percentage of the text taken up by each word in the text
+    split_text = text.split()
+    text_counter = collections.Counter(split_text)
+    length = len(split_text)
+    for key in text_counter:
+        text_counter[key] = text_counter[key] * 100 / length
+    
+    text_counter = collections.OrderedDict(text_counter.most_common())
+    
+    return text_counter
 
 #get a counter of the percentage of a text taken up by the words in that text.
 #if a baseline counter is provided to compare, subtract it.
@@ -47,22 +67,24 @@ def get_counter(type, df, typename='type', baseline=pd.DataFrame()):
 
 def main():
 
-    df = pd.read_csv('antisemitism_dataset.csv')
+    df = pd.read_csv('..\\data\\antisemitism_dataset.csv')
     
     #reconfigure/reorganize dataframe
     df['classification'] = df['classification'].astype(int)
     df['text'] = df['text'].astype(str)
     df['text'] = df['text'].apply(delete_punctuation) #delete punctuation from the text
     
-    #get counters and write to file for non-antisemitic text
-    baseline = get_counter(0, df, typename='classification') #get a baseline percentage counter (this is the counter for the non-antisemitic text)
-    base_df = to_df(baseline, 'Words', 'Percent Appearance')
-    base_df.to_csv('..\\rulesbased_model\\frequencies\\baseline.csv', index=False)
-    
     #get counters and write to file for antisemitic text
     all_antisemitic = get_counter(1, df, typename='classification') #get a baseline percentage counter (this is the counter for the non-antisemitic text)
-    all_df = to_df(all_antisemitic, 'Words', 'Percent Appearance')
+    all_df = to_df(all_antisemitic, COLUMN1, COLUMN2)
     all_df.to_csv('..\\rulesbased_model\\frequencies\\antisemitic.csv', index=False)
+    
+    #get counters and write to file for non-antisemitic text
+    non_antisemitic = pd.read_csv('..\\data\\normal_tweets.csv')
+    non_antisemitic_text = ' '.join(list(non_antisemitic['text']))
+    non_antisemitic_counter = get_text_counter(non_antisemitic_text)
+    base_df = to_df(non_antisemitic_counter, COLUMN1, COLUMN2)
+    base_df.to_csv('..\\rulesbased_model\\frequencies\\baseline.csv', index=False)
     
     #combine type of antisemitism and classification columns
     df['type_of_antisemitism'] = df['type_of_antisemitism'].apply(to_zero) #replace missing values with zero
@@ -74,12 +96,12 @@ def main():
         #make comparison counters between different types of antisemitism and
         #non-antisemitic text
         text_counter = get_counter(type, df, base_df) #make compared counter
-        temp_df = to_df(text_counter, 'Words', 'Percent Increase')
+        temp_df = to_df(text_counter, COLUMN1, 'Percent Increase')
         temp_df.to_csv(f'..\\data\\counters\\{type}.csv', index=False)
         
         #make raw counters to be used for the rules-based model
         frequency_counter = get_counter(type, df) #make frequency counter
-        temp_df = to_df(frequency_counter, 'Words', 'Percent Appearance')
+        temp_df = to_df(frequency_counter, COLUMN1, COLUMN2)
         temp_df.to_csv(f'..\\rulesbased_model\\frequencies\\{type}.csv', index=False)
 
 if __name__ == '__main__':
