@@ -19,23 +19,6 @@ def to_df(text_counter, column1, column2):
     output_df = output_df.sort_values(column2, ascending=False) #sort
     return output_df
 
-#get counter from only text
-def get_text_counter(text):
-    text = text.lower()
-    for stopword in nltk.corpus.stopwords.words('english'):
-        text = re.sub(f' {stopword} ', ' ', text)
-    
-    #get a counter of the percentage of the text taken up by each word in the text
-    split_text = text.split()
-    text_counter = collections.Counter(split_text)
-    length = len(split_text)
-    for key in text_counter:
-        text_counter[key] = text_counter[key] * 100 / length
-    
-    text_counter = collections.OrderedDict(text_counter.most_common())
-    
-    return text_counter
-
 #get a counter of the percentage of a text taken up by the words in that text.
 #if a baseline counter is provided to compare, subtract it.
 def get_counter(type, df, typename='type', baseline=pd.DataFrame()):
@@ -43,9 +26,10 @@ def get_counter(type, df, typename='type', baseline=pd.DataFrame()):
     #put the text of the rows of a certain type in a string, and get rid of stopwords
     df = df[df[typename] == type]
     text = ' '.join(list(df['text'].astype(str)))
-    text = text.lower()
+    text = f' {text} '
+    text = delete_punctuation(text.lower())
     for stopword in nltk.corpus.stopwords.words('english'):
-        text = re.sub(f' {stopword} ', ' ', text)
+        text = text.replace(f' {stopword} ', ' ')
     
     #get a counter of the percentage of the text taken up by each word in the text
     split_text = text.split()
@@ -80,9 +64,7 @@ def main():
     all_df.to_csv('..\\rulesbased_model\\frequencies\\antisemitic.csv', index=False)
     
     #get counters and write to file for non-antisemitic text
-    non_antisemitic = pd.read_csv('..\\data\\normal_tweets.csv')
-    non_antisemitic_text = ' '.join(list(non_antisemitic['text']))
-    non_antisemitic_counter = get_text_counter(non_antisemitic_text)
+    non_antisemitic_counter = get_counter(0, df, typename='classification')
     base_df = to_df(non_antisemitic_counter, COLUMN1, COLUMN2)
     base_df.to_csv('..\\rulesbased_model\\frequencies\\baseline.csv', index=False)
     

@@ -3,11 +3,16 @@ import nltk
 import math
 import re
 import collections
+import string
 
 WORD_COLUMN = 'Words'
 PERCENT_COLUMN = 'Percent Appearance'
 
-vector_distance = lambda v1, v2: math.sqrt(sum([(v1[i]-v2[i])**2 for i, _ in enumerate(v1)])) #distance between two vectors equation
+vector_distance = lambda v1, v2: math.sqrt(sum([(v1[i]-v2[i])**2 for (i, _) in enumerate(v1)])) #distance between two vectors equation
+#dot = lambda v1, v2: sum([v1[i]*v2[i] for (i, _) in enumerate(v1)])
+#mag = lambda v: math.sqrt(sum([item**2 for item in v]))
+#cosine_similarity = lambda v1, v2: dot(v1, v2)/mag(v1)*mag(v2)
+delete_punctuation = lambda x: ''.join([char for char in x if char not in string.punctuation])
 
 #put text counter into df
 def to_df(text_counter, column1, column2):
@@ -17,9 +22,10 @@ def to_df(text_counter, column1, column2):
     return output_df
     
 def get_text_counter(text):
-    text = text.lower()
+    text = f' {text} '
+    text = delete_punctuation(text.lower())
     for stopword in nltk.corpus.stopwords.words('english'):
-        text = re.sub(f' {stopword} ', ' ', text)
+        text = text.replace(f' {stopword} ', ' ')
     
     #get a counter of the percentage of the text taken up by each word in the text
     split_text = text.split()
@@ -38,9 +44,10 @@ def get_counter(type, df):
     #put the text of the rows of a certain type in a string, and get rid of stopwords
     df = df[df['type'] == type]
     text = ' '.join(list(df['text']))
-    text = text.lower()
+    text = f' {text} '
+    text = delete_punctuation(text.lower())
     for stopword in nltk.corpus.stopwords.words('english'):
-        text = re.sub(f' {stopword} ', ' ', text)
+        text = text.replace(f' {stopword} ', ' ')
     
     #get a counter of the percentage of the text taken up by each word in the text
     split_text = text.split()
