@@ -9,9 +9,9 @@ WORD_COLUMN = 'Words'
 PERCENT_COLUMN = 'Percent Appearance'
 
 vector_distance = lambda v1, v2: math.sqrt(sum([(v1[i]-v2[i])**2 for (i, _) in enumerate(v1)])) #distance between two vectors equation
-#dot = lambda v1, v2: sum([v1[i]*v2[i] for (i, _) in enumerate(v1)])
-#mag = lambda v: math.sqrt(sum([item**2 for item in v]))
-#cosine_similarity = lambda v1, v2: dot(v1, v2)/mag(v1)*mag(v2)
+dot = lambda v1, v2: sum([v1[i]*v2[i] for (i, _) in enumerate(v1)])
+mag = lambda v: math.sqrt(sum([item**2 for item in v]))
+cosine_similarity = lambda v1, v2: dot(v1, v2)/mag(v1)*mag(v2)
 delete_punctuation = lambda x: ''.join([char for char in x if char not in string.punctuation])
 
 #put text counter into df
@@ -99,6 +99,16 @@ def compare_vectors(text_vector, comparison_vector_dict):
     closest = min(distances)[1]
     return closest
 
+#compare vectors using cosine similarity
+def cosine_compare_vectors(text_vector, comparison_vector_dict):
+    similarities = [] #list of tuples in format (distance, key)
+    for key in comparison_vector_dict:
+        compare_vector = comparison_vector_dict[key]
+        similarity = cosine_similarity(text_vector, compare_vector)
+        similarities.append((similarity, key))
+    closest = max(similarities)[1]
+    return closest
+
 #put it all together
 def compare_text(text, keys, df_dict=None, column1=WORD_COLUMN, column2=PERCENT_COLUMN):
     text_counter = get_text_counter(text)
@@ -113,12 +123,36 @@ def compare_text(text, keys, df_dict=None, column1=WORD_COLUMN, column2=PERCENT_
     text_vector, comparison_vector_dict = to_vector(text_df, df_dict, column1, column2)
     closest = compare_vectors(text_vector, comparison_vector_dict)
     return closest
+    
+def cosine_compare_text(text, keys, df_dict=None, column1=WORD_COLUMN, column2=PERCENT_COLUMN):
+    text_counter = get_text_counter(text)
+    text_df = to_df(text_counter, column1, column2)
+    
+    #make dictionary with given keys
+    if not df_dict:
+        df_dict = dict()
+        for key in keys:
+            df_dict[key] = pd.read_csv(f'frequencies\\{key}.csv')
+    
+    text_vector, comparison_vector_dict = to_vector(text_df, df_dict, column1, column2)
+    closest = compare_vectors(text_vector, comparison_vector_dict)
+    
+    return closest
 
 #returns True if classified as antisemitic, False otherwise
 def is_antisemitic(text, df_dict=None):
     return 'antisemitic' == compare_text(text, ['baseline', 'antisemitic'], df_dict=df_dict)
 
+#classifies text with cosine similarity
+def cosine_is_antisemitic(text, df_dict=None):
+    return 'antisemitic' == cosine_compare_text(text, ['baseline', 'antisemitic'], df_dict=df_dict)
+
 #returns type of antisemitism predicted
 def type(text, df_dict=None):
     types = {'1': 'political', '2': 'economic', '3': 'religious', '4': 'racial'}
     return types[compare_text(text, ['1', '2', '3', '4'], df_dict=df_dict)]
+
+#returns type of antisemitism predicted with cosine similarity
+def cosine_type(text, df_dict=None):
+    types = {'1': 'political', '2': 'economic', '3': 'religious', '4': 'racial'}
+    return types[cosine_compare_text(text, ['1', '2', '3', '4'], df_dict=df_dict)]
