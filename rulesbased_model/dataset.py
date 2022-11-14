@@ -16,7 +16,7 @@ def main():
     
     #get dataframes for types
     type_dict = dict()
-    for x in range(1, 4):
+    for x in range(1, 5):
         type_dict[str(x)] = pd.read_csv(f'{FREQ_DIR}\\{x}.csv')
     
     #apply to files
