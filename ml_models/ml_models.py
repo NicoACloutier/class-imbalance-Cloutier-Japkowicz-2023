@@ -60,20 +60,11 @@ def tfidf(text, word_dict):
     
 #/WORD REPRESENTATIONS
 
-def main():
-
-    #Data preprocessing
-    train_df = pd.read_csv(f'{BASIC}\\train.csv')
-    train_df['text'] = train_df['text'].apply(clean).astype(str)
-    train_df = train_df[train_df['text'].apply(lambda x: len(x.split()) >= 1)]
-    test_df = pd.read_csv(f'{BASIC}\\test.csv')
-    test_df['text'] = test_df['text'].apply(clean).astype(str)
-    test_df = test_df[test_df['text'].apply(lambda x: len(x.split()) >= 1)]
-    
+def process_fit_test(train_df, test_df, output):
     train_input = train_df['text']
-    train_output = train_df['classification']
+    train_output = train_df[output]
     test_input = test_df['text']
-    test_output = test_df['classification']
+    test_output = test_df[output]
     
     #get wordlist
     all_text = ' '.join(list(train_df['text']) + list(test_df['text']))
@@ -111,11 +102,29 @@ def main():
             algo_name = algorithm['name']
             algo_model = algorithm['model']
         
-            score = fit_save_test(algo_model, f'{algo_name}-{rep_name}', 
+            score = fit_save_test(algo_model, f'{algo_name}-{rep_name}-{output}', 
                                   temp_train_input, temp_train_output,
                                   temp_test_input, temp_test_output)
             
-            print(f'Finished training {algo_name} model with {rep_name} representation. Scored {score:.3f}.')
+            print(f'Finished training {algo_name} model with {rep_name} representation, predicting {output}. Scored {score:.3f}.')
+    
+
+def main():
+
+    #Data preprocessing
+    train_df = pd.read_csv(f'{BASIC}\\train.csv')
+    train_df['text'] = train_df['text'].apply(clean).astype(str)
+    train_df = train_df[train_df['text'].apply(lambda x: len(x.split()) >= 1)]
+    test_df = pd.read_csv(f'{BASIC}\\test.csv')
+    test_df['text'] = test_df['text'].apply(clean).astype(str)
+    test_df = test_df[test_df['text'].apply(lambda x: len(x.split()) >= 1)]
+    
+    process_fit_test(train_df, test_df, 'classification')
+    
+    train_df = train_df[train_df['classification'] == 1]
+    test_df = test_df[test_df['classification'] == 1]
+    
+    process_fit_test(train_df, test_df, 'type_of_antisemitism')
 
 if __name__ == '__main__':
     main()

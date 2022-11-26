@@ -51,7 +51,7 @@ def get_counter(type, df, typename='type', baseline=pd.DataFrame()):
 
 def main():
 
-    df = pd.read_csv('..\\data\\antisemitism_dataset.csv')
+    df = pd.read_csv('..\\data\\train.csv')
     
     #reconfigure/reorganize dataframe
     df['classification'] = df['classification'].astype(int)

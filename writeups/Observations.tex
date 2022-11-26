@@ -5,7 +5,9 @@
 
 \begin{document}
 
-{\bf \emph{Observations on the Datasets}} \hfill Nicolas Cloutier\\\\
+{\bf \emph{Data Science Techniques for Automatic Antisemitism Detection}} \hfill Nicolas Cloutier
+
+Last edited \today.\\
 
 {\bf Difficulty of Rules-Based Classification}
 
@@ -60,11 +62,10 @@ Table 1: Evaluation on training data\\
 \begin{tabular}{ |c|c|c|c| } 
  \hline
 {\bf Method} & \bf{Task} & \bf{Accuracy} & \bf{Chance Accuracy}\\
-\hline
- Vector distance & Boolean classification & 0.76 & 0.5\\ 
- Vector distance & Type classification & 0.57 & 0.25\\ 
- Cosine similarity & Boolean classification & 0.76 & 0.5\\ 
- Cosine similarity & Type classification & 0.57 & 0.25\\ 
+\hline Vector distance & Boolean classification & 0.76 & 0.5\\ 
+\hline Vector distance & Type classification & 0.57 & 0.25\\ 
+\hline Cosine similarity & Boolean classification & 0.76 & 0.5\\ 
+\hline Cosine similarity & Type classification & 0.57 & 0.25\\ 
  \hline
 \end{tabular}
 \end{center}
@@ -74,13 +75,34 @@ It would appear as if the method used has little effect on the accuracy, and tha
 Table 2: Data summaries\\
 \begin{tabular}{ |c|c|c|c|c|c|c|}
 \hline {\bf Dataset} & {\bf Bool. avg.} & {\bf Cos. Bool. avg.} & {\bf 1 \#} & {\bf 2 \#} & {\bf 3 \#} & {\bf 4 \#}\\
-\hline 
-4Chan data & 0.85 & 0.85 & 504 & 575 & 1474 & 793\\
-Normal tweets & 0.60 & 0.60 & 3675 & 1357 & 2419 & 3549\\
-Labeled data & 0.44 & 0.44 & 515 & 133 & 277 & 296\\
+\hline 4Chan data & 0.85 & 0.85 & 504 & 575 & 1474 & 793\\
+\hline Normal tweets & 0.60 & 0.60 & 3675 & 1357 & 2419 & 3549\\
+\hline Labeled data & 0.44 & 0.44 & 515 & 133 & 277 & 296\\
 \hline
 \end{tabular}
 \end{center}
 
-Again, the different methods for calculating similarity appear to not affect outcomes at all. The occurence columns are given with vector distance, but these data are exactly the same as those calculated using cosine similarity. Looking at the Boolean averages for the normal data, it appears to be higher than may have been anticipated or hoped for, given that the tweets were collected from a random sample of tweets across 2021. Interestingly, the Boolean average of the normal tweets is higher than the Boolean average of the labeled data, which contained antisemitic tweets.
+Again, the different methods for calculating similarity appear to not affect outcomes at all. The occurence columns are given with vector distance, but these data are exactly the same as those calculated using cosine similarity. Looking at the Boolean averages for the normal data, it appears to be higher than may have been anticipated or hoped for, given that the tweets were collected from a random sample of tweets across 2021. Interestingly, the Boolean average of the normal tweets is higher than the Boolean average of the labeled data, which contained antisemitic tweets.\\
+
+{\bf Machine Learning Models}
+
+Three machine learning models were used: SVMs, Decision Trees, and Naïve Bayes classifiers. Each of those models was used for Boolean and type classification and with three seperate text representations (Bag-of-Words, raw frequency, and TF-IDF), making a total of 12 models. For the sake of evaluation, the rules-based model was retrained on only the training data, then tested on the test data. Models labeled RB are rules-based. The scores represent the proportion of the test dataset that the model correctly predicted, 1 means perfect predictions, 0 means entirely incorrect predictions.
+\begin{center}
+Table 3: Machine learning model evaluations and comparisons to rules-based model
+\begin{tabular}{ |c|c|c|c| }
+\hline {\bf Model type} & {\bf Text representation} & {\bf Boolean score} & {\bf Type score} \\
+\hline Decision Tree & BoW & 0.653 &  0.513\\
+\hline Decision Tree & Frequency & 0.695  &  0.692\\
+\hline Decision Tree & TF-IDF & 0.703 & 0.487\\
+\hline SVM & BoW & 0.703 & 0.692\\
+\hline SVM & Frequency & 0.703 & 0.564\\
+\hline SVM & TF-IDF & 0.678 & 0.462\\
+\hline Naïve Bayes & BoW & 0.669 & 0.769\\
+\hline Naïve Bayes & Frequency & 0.602 & 0.487\\
+\hline Naïve Bayes & TF-IDF & 0.602 & 0.462\\
+\hline Cosine Similarity (RB) & Frequency & 0.602 & 0.462\\
+\hline Vector Distance (RB) & Frequency & 0.602 & 0.462\\
+\hline
+\end{tabular}
+\end{center}
 \end{document}

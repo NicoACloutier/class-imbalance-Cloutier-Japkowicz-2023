@@ -20,7 +20,7 @@ def main():
         type_dict[str(x)] = pd.read_csv(f'{FREQ_DIR}\\{x}.csv')
     
     #apply to files
-    files = ['normal_tweets', 'cleaned_data', 'antisemitism_dataset']
+    files = ['normal_tweets', 'cleaned_data', 'test']
     for filename in files:
         df = pd.read_csv(f'{DATA_DIR}\\{filename}.csv')
         df['is_antisemitic'] = df['text'].apply(lambda x: int(rb.is_antisemitic(x, df_dict=is_antisemitic_dict)))
