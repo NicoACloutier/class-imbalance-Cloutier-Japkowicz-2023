@@ -86,7 +86,7 @@ Again, the different methods for calculating similarity appear to not affect out
 
 {\bf Machine Learning Models}
 
-Three machine learning models were used: SVMs, Decision Trees, and Naïve Bayes classifiers. Each of those models was used for Boolean and type classification and with three seperate text representations (Bag-of-Words, raw frequency, and TF-IDF), making a total of 12 models. For the sake of evaluation, the rules-based model was retrained on only the training data, then tested on the test data. Models labeled RB are rules-based. The scores represent the proportion of the test dataset that the model correctly predicted, 1 means perfect predictions, 0 means entirely incorrect predictions.
+Three machine learning models were used: SVMs, Decision Trees, and Naïve Bayes classifiers. Each of those models was used for Boolean and type classification and with three seperate text representations (Bag-of-Words, raw frequency, and TF-IDF), making a total of 18 models. For the sake of evaluation, the rules-based model was retrained on only the training data, then tested on the test data. Models labeled RB are rules-based. The scores represent the proportion of the test dataset that the model correctly predicted, 1 means perfect predictions, 0 means entirely incorrect predictions.
 \begin{center}
 Table 3: Machine learning model evaluations and comparisons to rules-based model
 \begin{tabular}{ |c|c|c|c| }
@@ -102,6 +102,7 @@ Table 3: Machine learning model evaluations and comparisons to rules-based model
 \hline Naïve Bayes & TF-IDF & 0.602 & 0.462\\
 \hline Cosine Similarity (RB) & Frequency & 0.602 & 0.462\\
 \hline Vector Distance (RB) & Frequency & 0.602 & 0.462\\
+\hline Vector Distance (RB) & TF-IDF & 0.602 & 0.462\\
 \hline
 \end{tabular}
 \end{center}

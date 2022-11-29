@@ -19,12 +19,20 @@ def to_df(text_counter, column1, column2):
     output_df = output_df.sort_values(column2, ascending=False) #sort
     return output_df
 
+#get idf part of tfidf
+def get_idf(text_counter, length):
+    for word in text_counter:
+        count = text_counter[word]
+        value = math.log(length/count)
+        text_counter[word] = value
+    return text_counter
+
 #get a counter of the percentage of a text taken up by the words in that text.
 #if a baseline counter is provided to compare, subtract it.
-def get_counter(type, df, typename='type', baseline=pd.DataFrame()):
+def get_counter(df, type=None, typename='type', baseline=pd.DataFrame()):
 
     #put the text of the rows of a certain type in a string, and get rid of stopwords
-    df = df[df[typename] == type]
+    if type: df = df[df[typename] == type]
     text = ' '.join(list(df['text'].astype(str)))
     text = f' {text} '
     text = delete_punctuation(text.lower())
@@ -36,7 +44,7 @@ def get_counter(type, df, typename='type', baseline=pd.DataFrame()):
     text_counter = collections.Counter(split_text)
     length = len(split_text)
     for key in text_counter:
-        text_counter[key] = text_counter[key] * 100 / length
+        text_counter[key] = text_counter[key] / length
     
     #if a baseline is provided, subtract the value from each word in the baseline
     #from the same word in the current text counter
@@ -49,6 +57,7 @@ def get_counter(type, df, typename='type', baseline=pd.DataFrame()):
     
     return text_counter
 
+
 def main():
 
     df = pd.read_csv('..\\data\\train.csv')
@@ -58,13 +67,18 @@ def main():
     df['text'] = df['text'].astype(str)
     df['text'] = df['text'].apply(delete_punctuation) #delete punctuation from the text
     
+    all_text = ' '.join(list(df['text'])).split()
+    all_counter = get_idf(get_counter(df), len(all_text))
+    all_counter_df = to_df(all_counter, COLUMN1, COLUMN2)
+    all_counter_df.to_csv('..\\rulesbased_model\\frequencies\\all.csv', index=False)
+    
     #get counters and write to file for antisemitic text
-    all_antisemitic = get_counter(1, df, typename='classification') #get a baseline percentage counter (this is the counter for the non-antisemitic text)
+    all_antisemitic = get_counter(df, type=1, typename='classification') #get a baseline percentage counter (this is the counter for the non-antisemitic text)
     all_df = to_df(all_antisemitic, COLUMN1, COLUMN2)
     all_df.to_csv('..\\rulesbased_model\\frequencies\\antisemitic.csv', index=False)
     
     #get counters and write to file for non-antisemitic text
-    non_antisemitic_counter = get_counter(0, df, typename='classification')
+    non_antisemitic_counter = get_counter(df, type=0, typename='classification')
     base_df = to_df(non_antisemitic_counter, COLUMN1, COLUMN2)
     base_df.to_csv('..\\rulesbased_model\\frequencies\\baseline.csv', index=False)
     
@@ -77,12 +91,12 @@ def main():
     for type in types:
         #make comparison counters between different types of antisemitism and
         #non-antisemitic text
-        text_counter = get_counter(type, df, base_df) #make compared counter
+        text_counter = get_counter(df, type=type, typename='type', baseline=base_df) #make compared counter
         temp_df = to_df(text_counter, COLUMN1, 'Percent Increase')
         temp_df.to_csv(f'..\\data\\counters\\{type}.csv', index=False)
         
         #make raw counters to be used for the rules-based model
-        frequency_counter = get_counter(type, df) #make frequency counter
+        frequency_counter = get_counter(df, type=type) #make frequency counter
         temp_df = to_df(frequency_counter, COLUMN1, COLUMN2)
         temp_df.to_csv(f'..\\rulesbased_model\\frequencies\\{type}.csv', index=False)
 

@@ -7,6 +7,7 @@ import string
 
 WORD_COLUMN = 'Words'
 PERCENT_COLUMN = 'Percent Appearance'
+TFIDF = '.\\frequencies\\all.csv'
 
 vector_distance = lambda v1, v2: math.sqrt(sum([(v1[i]-v2[i])**2 for (i, _) in enumerate(v1)])) #distance between two vectors equation
 dot = lambda v1, v2: sum([v1[i]*v2[i] for (i, _) in enumerate(v1)])
@@ -32,7 +33,7 @@ def get_text_counter(text):
     text_counter = collections.Counter(split_text)
     length = len(split_text)
     for key in text_counter:
-        text_counter[key] = text_counter[key] * 100 / length
+        text_counter[key] = text_counter[key] / length
     
     text_counter = collections.OrderedDict(text_counter.most_common())
     
@@ -54,7 +55,7 @@ def get_counter(type, df):
     text_counter = collections.Counter(split_text)
     length = len(split_text)
     for key in text_counter:
-        text_counter[key] = text_counter[key] * 100 / length
+        text_counter[key] = text_counter[key] / length
     
     text_counter = collections.OrderedDict(text_counter.most_common())
     
@@ -86,6 +87,49 @@ def to_vector(text_df, comparison_dict, column1, column2):
         
         comparison_vector = list(comparison_df[column2])
         comparison_vector_dict[key] = comparison_vector
+    
+    return text_vector, comparison_vector_dict
+    
+#do same as above, but with tfidf
+def to_vector_tfidf(text_df, comparison_dict, tfidf_df, column1, column2):
+    comparison_vector_dict = dict()
+    text_df = text_df.sort_values(column1) #sort alphabetically (so they're in the same order)
+    text_vector = list(text_df[column2])
+    words = list(text_df[column1]) #words in tweet
+    
+    tfidf_words = list(tfidf[column1])
+    non_overlap_words = [word for word in words if word not in tfidf_words] #words in tweet, not in dataset
+    zeroes = [0 for word in non_overlap_words]
+    non_overlap_df = pd.DataFrame([non_overlap_words, zeroes], [column1, column2]).transpose()
+    comparison_df = pd.concat([comparison_df, non_overlap_df])
+    
+    #delete values in dataset that aren't in text
+    comparison_df = comparison_df.loc[comparison_df[column1].isin(words)]
+    comparison_df = comparison_df.sort_values(column1) #sort alphabetically (so they're in the same order)
+    
+    tfidf_vector = list(comparison_df[column2])
+
+    for key in comparison_dict:
+        comparison_df = comparison_dict[key]
+        comparison_words = list(comparison_df[column1]) #words in dataset
+        
+        #add words that appear in tweet and not in dataset to dataset
+        #(they all get frequency scores of 0)
+        non_overlap_words = [word for word in words if word not in comparison_words] #words in tweet, not in dataset
+        zeroes = [0 for word in non_overlap_words]
+        non_overlap_df = pd.DataFrame([non_overlap_words, zeroes], [column1, column2]).transpose()
+        comparison_df = pd.concat([comparison_df, non_overlap_df])
+        
+        #delete values in dataset that aren't in text
+        comparison_df = comparison_df.loc[comparison_df[column1].isin(words)]
+        comparison_df = comparison_df.sort_values(column1) #sort alphabetically (so they're in the same order)
+        
+        comparison_vector = list(comparison_df[column2])
+        comparison_vector_dict[key] = comparison_vector
+    
+    text_vector = [item * tfidf[i] for (i, item) in text_vector]
+    for key in comparison_vector_dict:
+        comparison_vector_dict[key] = [item * tfidf[i] for (i, item) in comparison_vector_dict[key]]
     
     return text_vector, comparison_vector_dict
 
@@ -124,7 +168,24 @@ def compare_text(text, keys, df_dict=None, column1=WORD_COLUMN, column2=PERCENT_
     closest = compare_vectors(text_vector, comparison_vector_dict)
     return closest
     
+#compare text using cosine similarity
 def cosine_compare_text(text, keys, df_dict=None, column1=WORD_COLUMN, column2=PERCENT_COLUMN):
+    text_counter = get_text_counter(text)
+    text_df = to_df(text_counter, column1, column2)
+    
+    #make dictionary with given keys
+    if not df_dict:
+        df_dict = dict()
+        for key in keys:
+            df_dict[key] = pd.read_csv(f'frequencies\\{key}.csv')
+    
+    text_vector, comparison_vector_dict = to_vector(text_df, df_dict, column1, column2)
+    closest = compare_vectors(text_vector, comparison_vector_dict)
+    
+    return closest
+
+#compare text with tfidf
+def tfidf_compare_text(text, keys, tfidf_df, df_dict=None, column1=WORD_COLUMN, column2=PERCENT_COLUMN):
     text_counter = get_text_counter(text)
     text_df = to_df(text_counter, column1, column2)
     
@@ -143,6 +204,11 @@ def cosine_compare_text(text, keys, df_dict=None, column1=WORD_COLUMN, column2=P
 def is_antisemitic(text, df_dict=None):
     return 'antisemitic' == compare_text(text, ['baseline', 'antisemitic'], df_dict=df_dict)
 
+#same as above, but with tfidf
+def is_antisemitic_tfidf(text, tfidf_df=pd.DataFrame(), df_dict=None):
+    if tfidf_df.empty: tfidf_df = pd.read_csv(TFIDF)
+    return 'antisemitic' == tfidf_compare_text(text, ['baseline', 'antisemitic'], tfidf_df=tfidf_df, df_dict=df_dict)
+
 #classifies text with cosine similarity
 def cosine_is_antisemitic(text, df_dict=None):
     return 'antisemitic' == cosine_compare_text(text, ['baseline', 'antisemitic'], df_dict=df_dict)
@@ -151,6 +217,12 @@ def cosine_is_antisemitic(text, df_dict=None):
 def type(text, df_dict=None):
     types = {'1': 'political', '2': 'economic', '3': 'religious', '4': 'racial'}
     return types[compare_text(text, ['1', '2', '3', '4'], df_dict=df_dict)]
+
+#classify type of antisemitism using tf-idf text representations
+def type_tfidf(text, tfidf_df=pd.DataFrame(), df_dict=None):
+    types = {'1': 'political', '2': 'economic', '3': 'religious', '4': 'racial'}
+    if tfidf_df.empty: tfidf_df = pd.read_csv(TFIDF)
+    return types[tfidf_compare_text(text, ['1', '2', '3', '4'], tfidf_df=tfidf_df, df_dict=df_dict)]
 
 #returns type of antisemitism predicted with cosine similarity
 def cosine_type(text, df_dict=None):

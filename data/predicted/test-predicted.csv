@@ -1,4 +1,4 @@
-id,text,classification,type_of_antisemitism,image_url,is_antisemitic,predicted_type,cos_is_antisemitic,cos_predicted_type
+id,text,classification,type_of_antisemitism,image_url,is_antisemitic,predicted_type,tfidf-is_antisemitic,tfidf-type
 1.2927506331042895e+18,Not what you think  Propagandist  PRO zionist (Amos Oz supporter) Parents —&gt; Hollywood,1,0.0,https://pbs.twimg.com/media/EfDF2TjXYAE_a4h.jpg,1,0,1,0
 1.2933593797193687e+18,"We didn't fail because we're useless and our ideology is incoherent, it-- IT WAS THE JEWS' FAULT",1,3.0,https://pbs.twimg.com/media/EfLvdZ5XYAEUMiP.jpg,0,2,0,2
 1.2848663218601329e+18,I've got Zog in storage in a cupboard. He's in a really sad shape also. Another one for the restoration list...,0,,https://pbs.twimg.com/media/EdTC-UFWAAAkzQH.jpg,0,3,0,3

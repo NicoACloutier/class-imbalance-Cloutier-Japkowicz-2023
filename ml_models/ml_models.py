@@ -80,6 +80,7 @@ def process_fit_test(train_df, test_df, output):
     rep_methods = [{'name': 'bow', 'function': bow, 'wordlist': wordlist}, #methods for representing text
                    {'name': 'freq', 'function': freq, 'wordlist': wordlist},
                    {'name': 'tfidf', 'function': tfidf, 'wordlist': word_dict}]
+    
     algorithms = [{'name': 'decision-tree', 'model': tree.DecisionTreeClassifier()}, #algorithms for classification
                   {'name': 'svm', 'model': svm.SVC()},
                   {'name': 'naive-bayes', 'model': naive_bayes.GaussianNB()}]
