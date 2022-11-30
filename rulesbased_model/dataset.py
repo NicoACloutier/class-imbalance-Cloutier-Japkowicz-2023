@@ -29,7 +29,7 @@ def main():
     print(f'Setup completed in {end - start:.3f} seconds.')
     
     #apply to files
-    files = ['test', 'cleaned_data', 'normal_tweets']
+    files = ['test']
     for filename in files:
         file_start = time.time()
         df = pd.read_csv(f'{DATA_DIR}\\{filename}.csv')
