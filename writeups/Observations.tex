@@ -86,20 +86,20 @@ Again, the different methods for calculating similarity appear to not affect out
 
 {\bf Machine Learning Models}
 
-Three machine learning models were used: SVMs, Decision Trees, and Naïve Bayes classifiers. Each of those models was used for Boolean and type classification and with three seperate text representations (Bag-of-Words, raw frequency, and TF-IDF), making a total of 18 models. For the sake of evaluation, the rules-based model was retrained on only the training data, then tested on the test data. Models labeled RB are rules-based. The scores represent the proportion of the test dataset that the model correctly predicted, 1 means perfect predictions, 0 means entirely incorrect predictions.
+Three machine learning models were used: SVMs, Decision Trees, and Naïve Bayes classifiers. Each of those models was used for Boolean and type classification and with three seperate text representations (Bag-of-Words, raw frequency, and TF-IDF), making a total of 18 models. For the sake of evaluation, the rules-based model was retrained on only the training data, then tested on the test data. Models labeled RB are rules-based. The scores represent the proportion of the test dataset that the model correctly predicted, 1 means perfect predictions, 0 means entirely incorrect predictions. The models were evaluated with 10-fold cross-validation.
 \begin{center}
 Table 3: Machine learning model evaluations and comparisons to rules-based model
 \begin{tabular}{ |c|c|c|c| }
 \hline {\bf Model type} & {\bf Text representation} & {\bf Boolean score} & {\bf Type score} \\
-\hline Decision Tree & BoW & 0.757 &  0.568\\
-\hline Decision Tree & Frequency & 0.736  &  0.667\\
-\hline Decision Tree & TF-IDF & 0.750 & 0.667\\
-\hline SVM & BoW & 0.794 & 0.593\\
-\hline SVM & Frequency & 0.780 & 0.531\\
-\hline SVM & TF-IDF & 0.723 & 0.481\\
-\hline Naïve Bayes & BoW & 0.645 & 0.506\\
-\hline Naïve Bayes & Frequency & 0.622 & 0.593\\
-\hline Naïve Bayes & TF-IDF & 0.625 & 0.593\\
+\hline Decision Tree & BoW & 0.725 &  0.579\\
+\hline Decision Tree & Frequency & 0.738  &  0.576\\
+\hline Decision Tree & TF-IDF & 0.746 & 0.603\\
+\hline SVM & BoW & 0.772 & 0.597\\
+\hline SVM & Frequency & 0.758 & 0.552\\
+\hline SVM & TF-IDF & 0.734 & 0.488\\
+\hline Naïve Bayes & BoW & 0.635 & 0.521\\
+\hline Naïve Bayes & Frequency & 0.593 & 0.541\\
+\hline Naïve Bayes & TF-IDF & 0.597 & 0.535\\
 \hline Cosine Similarity (RB) & Frequency & 0.602 & 0.462\\
 \hline Vector Distance (RB) & Frequency & 0.602 & 0.462\\
 \hline Vector Distance (RB) & TF-IDF & 0.602 & 0.462\\
