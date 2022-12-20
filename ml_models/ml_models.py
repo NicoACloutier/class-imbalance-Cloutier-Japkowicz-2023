@@ -10,10 +10,24 @@ BASIC = '..\\data'
 MODEL_DIR = '.\\models'
 NUMBER_PARTITIONS = 10
 COLUMNS = ['Algorithm', 'Representation', 'Task', 'Score', 'Partition']
-report_df = pd.DataFrame(columns=COLUMNS) #df that will be written to a report file with info on model performance
 
 value_or_zero = lambda x, dict: 0 if not x in dict else dict[x] #return dictionary value if key in dictionary, otherwise return 0
 delete_punctuation = lambda x: ''.join([char for char in x if char not in string.punctuation]) #delete punctuation from string
+
+#concatenate two dictionaries
+def dict_concat(dict1, dict2):
+    for key in dict2:
+        dict1[key] = dict2[key]
+    return dict1
+
+#given two dictionaries with identical keys and list values,
+#concatenate the corresponding values lists from the second to
+#the first where the keys are the same
+def append_dict_values(dict1, dict2):
+    for key in dict1:
+        if key in dict2:
+            dict1[key] = dict1[key] + dict2[key]
+    return dict1
 
 #remove stopwords from text, put in lowercase, and delete punctuation
 def clean(text):
@@ -22,23 +36,14 @@ def clean(text):
     for stopword in nltk.corpus.stopwords.words('english'):
         text = text.replace(f' {stopword} ', ' ')
     return text
-
-#test single-variable output models,
-#output of 1 means every prediction correct,
-#0 means every prediction incorrect
-def test(model, test_input, test_output):
-    predictions = model.predict(test_input)
-    wrong = [int(prediction == test_output[i]) for (i, prediction) in enumerate(predictions)]
-    avg = sum(wrong) / len(wrong)
-    return avg
     
 #fit a model, save to file, and test
-def fit_save_test(model, model_name, train_input, train_output, test_input, test_output):
+def fit_save_test(model, model_name, train_input, train_output, test_input):
     model.fit(train_input, train_output)
     filename = f'{MODEL_DIR}\\{model_name}.sav'
     pickle.dump(model, open(filename, 'wb'))
-    avg = test(model, test_input, test_output)
-    return avg
+    predictions = model.predict(test_input)
+    return predictions
     
 #WORD REPRESENTATIONS
 
@@ -67,7 +72,7 @@ def tfidf(text, word_dict):
 #update report df
 def train_representations(train_input, train_output, test_input, 
                           test_output, rep_method, algorithms, partition, task):
-    global report_df
+    temp_predictions = dict()
     
     rep_name = rep_method['name']
     rep_func = rep_method['function']
@@ -79,22 +84,28 @@ def train_representations(train_input, train_output, test_input,
     temp_test_input = test_input.apply(lambda x: rep_func(x, rep_list)).values.tolist()
     temp_test_output = test_output.values.tolist()
     
+    temp_predictions['Actual'] = temp_test_output
+    
     for algorithm in algorithms:
         
         algo_name = algorithm['name']
         algo_model = algorithm['model']
     
-        score = fit_save_test(algo_model, f'{algo_name}-{rep_name}-{task}', 
-                              temp_train_input, temp_train_output,
-                              temp_test_input, temp_test_output)
+        predictions = list(fit_save_test(algo_model, f'{algo_name}-{rep_name}-{task}', 
+                                         temp_train_input, temp_train_output,
+                                         temp_test_input))
         
-        print(f'Finished training {algo_name} model with {rep_name} representation, predicting {task}. Scored {score:.3f}.')
-        temp_report = pd.DataFrame([algo_name, rep_name, task, score, partition], COLUMNS).transpose()
-        report_df = pd.concat([report_df, temp_report])
+        temp_predictions[f'{algo_name}-{rep_name}-{task}'] = predictions
+        
+        print(f'Finished training {algo_name} model with {rep_name} representation, predicting {task}.')
+    
+    return temp_predictions
     
 #given a single partition, train and test each model with each rep method
 def train_and_test(train_input, train_output, test_input, 
                    test_output, partition, task):
+    temp_predictions = dict()
+    
     #get wordlist
     all_text = ' '.join(list(train_input) + list(test_input))
     all_text_split = all_text.split()
@@ -115,13 +126,16 @@ def train_and_test(train_input, train_output, test_input,
                   {'name': 'naive-bayes', 'model': naive_bayes.GaussianNB()}]
     
     for rep_method in rep_methods:
-        train_representations(train_input, train_output, test_input, test_output, 
-                              rep_method, algorithms, partition, task)
-
+        temp_predictions = dict_concat(train_representations(train_input, train_output, test_input, test_output, 
+                                       rep_method, algorithms, partition, task), temp_predictions)
+    
+    return temp_predictions
 
 #perform the entire process of training all models with all representations across all partitions,
 #only for one task
 def process_fit_test(df, output):
+    prediction_dict = dict()
+
     length = len(df)
     jump = length // NUMBER_PARTITIONS #value increased each partition
     for partition in range(NUMBER_PARTITIONS):
@@ -138,11 +152,14 @@ def process_fit_test(df, output):
         test_input = test_df['text']
         test_output = test_df[output]
     
-        train_and_test(train_input, train_output, test_input, test_output, 
-                       partition, output)
+        prediction_dict = append_dict_values(train_and_test(train_input, train_output, test_input, 
+                                                            test_output, partition, output), prediction_dict)
+    
+    predictions_df = pd.DataFrame(prediction_dict)
+    
+    return predictions_df
 
 def main():
-    global report_df
 
     #Data preprocessing
     df = pd.read_csv(f'{BASIC}\\antisemitism_dataset.csv')
@@ -150,11 +167,13 @@ def main():
     df['text'] = df['text'].apply(clean).astype(str)
     df = df[df['text'].apply(lambda x: len(x.split()) >= 1)]
     
-    process_fit_test(df, 'classification')
-    df = df[df['classification'] == 1]
-    process_fit_test(df, 'type_of_antisemitism')
+    binary_predictions_df = process_fit_test(df, 'classification')
+    binary_predictions_df.to_csv('binary_predictions.csv', index=False)
     
-    report_df.to_csv('model_report.csv', index=False)
+    df = df[df['classification'] == 1]
+    type_predictions_df = process_fit_test(df, 'type_of_antisemitism')
+    type_predictions_df.to_csv('type_predictions.csv', index=False)
+    
 
 if __name__ == '__main__':
     main()
