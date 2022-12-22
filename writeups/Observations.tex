@@ -33,7 +33,7 @@ For example, for the counter \texttt{\{"big": 50, "brown": 25, "fox": 25\}}, the
     49.943841\\
     25\\
     25\
-  \end{array} } \right] = \vec{a} , \left| \vec{a} \right| \approx 61.19
+  \end{array} } \right] = \vec{a} , \left| \left| \vec{a} \right| \right| \approx 61.19
 \]
 
 \[
@@ -49,7 +49,7 @@ For example, for the counter \texttt{\{"big": 50, "brown": 25, "fox": 25\}}, the
     49.874781\\
     25\\
     24.991652\\
-  \end{array} } \right] = \vec{b},\hfill \left| \vec{b} \right| \approx 61.13
+  \end{array} } \right] = \vec{b},\hfill \left| \left| \vec{b} \right| \right| \approx 61.13
 \]
 
 Since the vector representing the non-antisemitic dataset is slightly closer to this input text, it would be classified as not antisemitic. The distances between these vectors becomes smaller as larger texts are inputted with frequency distributions that more closely match those of the datasets. An alternative method would be finding the cosine similarity between the vectors and choosing whichever has the highest as the closest distribution.\\
@@ -106,4 +106,6 @@ Table 3: Machine learning model evaluations and comparisons to rules-based model
 \hline
 \end{tabular}
 \end{center}
+
+Again, it would appear as if method and representation has no effect on rules based model predictions.
 \end{document}
