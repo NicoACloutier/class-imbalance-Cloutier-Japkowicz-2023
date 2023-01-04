@@ -5,7 +5,6 @@ import nltk
 import collections
 import math
 import pickle
-from scipy import stats
 
 BASIC = '..\\data'
 MODEL_DIR = '.\\models'
@@ -124,7 +123,8 @@ def train_and_test(train_input, train_output, test_input,
     
     algorithms = [{'name': 'decision-tree', 'model': tree.DecisionTreeClassifier()}, #algorithms for classification
                   {'name': 'svm', 'model': svm.SVC()},
-                  {'name': 'naive-bayes', 'model': naive_bayes.GaussianNB()}]
+                  {'name': 'naive-bayes', 'model': naive_bayes.GaussianNB()},
+                  {'name': 'naive-bayes-multinomial', 'model': naive_bayes.MultinomialNB()}]
     
     for rep_method in rep_methods:
         temp_predictions = dict_concat(train_representations(train_input, train_output, test_input, test_output, 
@@ -171,38 +171,9 @@ def main():
     binary_predictions_df = process_fit_test(df, 'classification')
     binary_predictions_df.to_csv('binary_predictions.csv', index=False)
     
-    friedman_result = stats.friedmanchisquare(
-                         binary_predictions_df['decision-tree-tfidf-classification'],
-                         binary_predictions_df['svm-tfidf-classification'],
-                         binary_predictions_df['naive-bayes-tfidf-classification'],
-                         binary_predictions_df['decision-tree-freq-classification'],
-                         binary_predictions_df['svm-freq-classification'],
-                         binary_predictions_df['naive-bayes-freq-classification'],
-                         binary_predictions_df['decision-tree-bow-classification'],
-                         binary_predictions_df['svm-bow-classification'],
-                         binary_predictions_df['naive-bayes-bow-classification'],
-                         )
-    
-    print(f'Binary result: {friedman_result}')
-    
     df = df[df['classification'] == 1]
     type_predictions_df = process_fit_test(df, 'type_of_antisemitism')
     type_predictions_df.to_csv('type_predictions.csv', index=False)
-    
-    friedman_result = stats.friedmanchisquare(
-                         type_predictions_df['decision-tree-tfidf-type_of_antisemitism'],
-                         type_predictions_df['svm-tfidf-type_of_antisemitism'],
-                         type_predictions_df['naive-bayes-tfidf-type_of_antisemitism'],
-                         type_predictions_df['decision-tree-freq-type_of_antisemitism'],
-                         type_predictions_df['svm-freq-type_of_antisemitism'],
-                         type_predictions_df['naive-bayes-freq-type_of_antisemitism'],
-                         type_predictions_df['decision-tree-bow-type_of_antisemitism'],
-                         type_predictions_df['svm-bow-type_of_antisemitism'],
-                         type_predictions_df['naive-bayes-bow-type_of_antisemitism'],
-                         )
-    
-    print(f'Type result: {friedman_result}')
-    
 
 if __name__ == '__main__':
     main()

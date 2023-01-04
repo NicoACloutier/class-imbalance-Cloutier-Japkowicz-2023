@@ -92,15 +92,18 @@ Three machine learning models were used: SVMs, Decision Trees, and Naïve Bayes 
 Table 3: Machine learning model evaluations --- binary classification
 \begin{tabular}{ |c|c|c| }
 \hline {\bf Model type} & {\bf Text representation} & {\bf Score}\\
-\hline Decision Tree & BoW & 0.722\\
-\hline Decision Tree & Frequency & 0.756\\
-\hline Decision Tree & TF-IDF & 0.760\\
-\hline SVM & BoW & 0.769\\
-\hline SVM & Frequency & 0.757\\
-\hline SVM & TF-IDF & 0.732\\
-\hline Naïve Bayes & BoW & 0.638\\
-\hline Naïve Bayes & Frequency & 0.591\\
-\hline Naïve Bayes & TF-IDF & 0.599\\
+\hline SVM & BoW & 0.774\\
+\hline SVM & Frequency & 0.760\\
+\hline Decision Tree & Frequency & 0.747\\
+\hline Decision Tree & TF-IDF & 0.739\\
+\hline Multinomial NB & BoW & 0.732\\
+\hline SVM & TF-IDF & 0.729\\
+\hline Decision Tree & BoW & 0.720\\
+\hline Multinomial NB & Frequency & 0.718\\
+\hline Multinomial NB & TF-IDF & 0.630\\
+\hline Gaussian NB & BoW & 0.630\\
+\hline Gaussian NB & TF-IDF & 0.602\\
+\hline Gaussian NB & Frequency & 0.600\\
 \hline
 \end{tabular}
 \end{center}
@@ -109,9 +112,10 @@ Table 3: Machine learning model evaluations --- binary classification
 Table 4: Algorithm comparison --- binary classification\\
 \begin{tabular}{ |c|c| }
 \hline {\bf Model type}& {\bf Score}\\
-\hline Decision Tree & 0.767\\
-\hline Support Vector Machine & 0.754\\
-\hline Naïve Bayes & 0.600\\
+\hline Support Vector Machine & 0.757\\
+\hline Decision Tree & 0.749\\
+\hline Multinomial NB & 0.728\\
+\hline Gaussian NB & 0.707\\
 \hline
 \end{tabular}
 \end{center}
@@ -120,28 +124,31 @@ Table 4: Algorithm comparison --- binary classification\\
 Table 5: Representation comparison --- binary classification\\
 \begin{tabular}{ |c|c| }
 \hline {\bf Representation}& {\bf Score}\\
-\hline Bag of Words & 0.766\\
-\hline Frequency & 0.761\\
-\hline TF-IDF & 0.749\\
+\hline Bag of Words & 0.767\\
+\hline TF-IDF & 0.742\\
+\hline Frequency & 0.736\\
 \hline
 \end{tabular}
 \end{center}
 
-Using a Friedman Chi Squared test, the \emph{p}-value for table 3 is $6.30 \times 10^{-89}$, the \emph{p}-value for the different algorithms is $1.98 \times 10^{-59}$, and the \emph{p}-value for the different representations is $1.18 \times 10^{-16}$.
+Using a Friedman Chi Squared test, the \emph{p}-value for table 3 is approximately 0, the \emph{p}-value for the different algorithms is $6.42 \times 10^{-33}$, and the \emph{p}-value for the different representations is $3.12 \times 10^{-29}$.
 
 \begin{center}
 Table 6: Machine learning model evaluations --- type classification\\
 \begin{tabular}{ |c|c|c| }
 \hline {\bf Model type} & {\bf Text representation} & {\bf Score} \\
-\hline Decision Tree & BoW & 0.576\\
-\hline Decision Tree & Frequency & 0.567\\
-\hline Decision Tree & TF-IDF & 0.555\\
-\hline SVM & BoW & 0.582\\
-\hline SVM & Frequency & 0.521\\
-\hline SVM & TF-IDF & 0.476\\
-\hline Naïve Bayes & BoW & 0.515\\
-\hline Naïve Bayes & Frequency & 0.538\\
-\hline Naïve Bayes & TF-IDF & 0.526\\
+\hline Multinomial NB & TF-IDF & 0.612\\
+\hline Multinomial NB & BoW & 0.597\\
+\hline SVM & BoW & 0.594\\
+\hline Decision Tree & TF-IDF & 0.588\\
+\hline Decision Tree & Frequency & 0.576\\
+\hline SVM & Frequency & 0.556\\
+\hline Decision Tree & BoW & 0.550\\
+\hline Gaussian NB & BoW & 0.541\\
+\hline Gaussian NB & Frequency & 0.538\\
+\hline Gaussian NB & TF-IDF & 0.517\\
+\hline SVM & TF-IDF & 0.509\\
+\hline Multinomial NB & Frequency & 0.494\\
 \hline
 \end{tabular}
 \end{center}
@@ -150,9 +157,10 @@ Table 6: Machine learning model evaluations --- type classification\\
 Table 7: Algorithm comparison --- type classification\\
 \begin{tabular}{ |c|c| }
 \hline {\bf Model type}& {\bf Score}\\
-\hline Decision Tree & 0.582\\
-\hline Naïve Bayes & 0.535\\
-\hline Support Vector Machine & 0.524\\
+\hline Multinomial NB & 0.606\\
+\hline Decision Tree & 0.585\\
+\hline Gaussian NB & 0.579\\
+\hline Support Vector Machine & 0.550\\
 \hline
 \end{tabular}
 \end{center}
@@ -161,13 +169,13 @@ Table 7: Algorithm comparison --- type classification\\
 Table 8: Representation comparison --- type classification\\
 \begin{tabular}{ |c|c| }
 \hline {\bf Representation}& {\bf Score}\\
-\hline Frequency & 0.588\\
-\hline Bag of Words & 0.585\\
-\hline TF-IDF & 0.541\\
+\hline Bag of Words & 0.600\\
+\hline TF-IDF & 0.576\\
+\hline Frequency & 0.547\\
 \hline
 \end{tabular}
 \end{center}
 
-Using a Friedman Chi Squared test, the \emph{p}-value for table 6 is $2.52 \times 10^{-29}$, the \emph{p}-value for the different algorithms is $1.00 \times 10^{-11}$, and the \emph{p}-value for the different representations is $0.0014$.
+Using a Friedman Chi Squared test, the \emph{p}-value for table 6 is $4.29 \times 10^{-112}$, the \emph{p}-value for the different algorithms is $3.08 \times 10^{-28}$, and the \emph{p}-value for the different representations is $9.20 \times 10^{-16}$.
 
 \end{document}
