@@ -17,7 +17,7 @@ In the directory labeled ``data'', there is a subdirectory labeled ``counters'' 
 
 {\bf Rules-Based Classifier Design}
 
-I begin by taking in an input text, putting it all in lowercase, removing stopwords, removing punctuation, and reducing it to a percentage frequency counter of each unique word in the text. For example, \texttt{"The big, big brown fox"} would be represented as \texttt{\{"big": 50, "brown": 25, "fox": 25\}}. This process is done for the combined text of all antisemitic tweets and non-antisemitic tweets, as well as individually for the tweets of each of the four types of antisemitism. I stored the resultant frequencies in a subdirectory of the ``rulesbased\texttt{\char`_}model'' directory entitled ``frequencies.'' In order to determine if a text is antisemitic, I do this same basic process to represent it as a series of frequencies. I then read the frequencies of the antisemitic and non-antisemitic datasets, removing any words from those datasets that do not appear in the input text and adding a new row with a frequency of 0 for words that appear in the input text but not the dataset. After that, I order the words alphabetically in all three \texttt{DataFrame} objects so they are all in the same order. Then, I store the second column of the \texttt{DataFrame} objects (the one containing the frequency percentages) in three vectors, one for the input, and the other two for the two datasets. I then find the distance between the input vector and each of the two dataset vectors, and choose whichever dataset has the smaller distance as the one that more closely represents the input data.\\
+I begin by taking in an input text, putting it all in lowercase, removing stopwords, removing punctuation, and reducing it to a percentage frequency counter of each unique word in the text. For example, \texttt{"The big, big brown fox"} would be represented as \texttt{\{"big": 50, "brown": 25, "fox": 25\}}. This process is done for the combined text of all antisemitic tweets and non-antisemitic tweets, as well as individually for the tweets of each of the four types of antisemitism. I stored the resultant frequencies in a subdirectory of the ``rulesbased-model'' directory entitled ``frequencies.'' In order to determine if a text is antisemitic, I do this same basic process to represent it as a series of frequencies. I then read the frequencies of the antisemitic and non-antisemitic datasets, removing any words from those datasets that do not appear in the input text and adding a new row with a frequency of 0 for words that appear in the input text but not the dataset. After that, I order the words alphabetically in all three \texttt{DataFrame} objects so they are all in the same order. Then, I store the second column of the \texttt{DataFrame} objects (the one containing the frequency percentages) in three vectors, one for the input, and the other two for the two datasets. I then find the distance between the input vector and each of the two dataset vectors, and choose whichever dataset has the smaller distance as the one that more closely represents the input data.\\
 
 For example, for the counter \texttt{\{"big": 50, "brown": 25, "fox": 25\}}, the antisemitic dataset would have a counter \texttt{\{"big": 0.056159, "brown": 0, "fox": 0\}}, and the baseline would have \texttt{\{"big": 0.125219, "brown": 0, "fox": 0.008348\}}. The next step would be to sort these words alphabetically, but luckily the order they come in in the text is already alphabetical. Next, they would be represented as vectors and the distance would be found between them and the input text, as shown:\\
 \[
@@ -86,96 +86,6 @@ Again, the different methods for calculating similarity appear to not affect out
 
 {\bf Machine Learning Models}
 
-Three machine learning models were used: SVMs, Decision Trees, and Naïve Bayes classifiers. Each of those models was used for Boolean and type classification and with three seperate text representations (Bag-of-Words, raw frequency, and TF-IDF), making a total of 18 models. For the sake of evaluation, the rules-based model was retrained on only the training data, then tested on the test data. Models labeled RB are rules-based. The scores represent the proportion of the test dataset that the model correctly predicted, 1 means perfect predictions, 0 means entirely incorrect predictions. The models were evaluated using 10-fold cross-validation. Tables with rankings for the specific algorithms and text representations are given after, these were taken by getting the accuracy scores of the most common responses given by the models that use that representation or algorithm. More in-depth evaluations, including how each model performed on each individual classification, can be found in the \texttt{ml\_models} directory under the filename \texttt{friedman.ipynb}.
-
-\begin{center}
-Table 3: Machine learning model evaluations --- binary classification
-\begin{tabular}{ |c|c|c| }
-\hline {\bf Model type} & {\bf Text representation} & {\bf Score}\\
-\hline SVM & BoW & 0.774\\
-\hline SVM & Frequency & 0.760\\
-\hline Decision Tree & Frequency & 0.747\\
-\hline Decision Tree & TF-IDF & 0.739\\
-\hline Multinomial NB & BoW & 0.732\\
-\hline SVM & TF-IDF & 0.729\\
-\hline Decision Tree & BoW & 0.720\\
-\hline Multinomial NB & Frequency & 0.718\\
-\hline Multinomial NB & TF-IDF & 0.630\\
-\hline Gaussian NB & BoW & 0.630\\
-\hline Gaussian NB & TF-IDF & 0.602\\
-\hline Gaussian NB & Frequency & 0.600\\
-\hline
-\end{tabular}
-\end{center}
-
-\begin{center}
-Table 4: Algorithm comparison --- binary classification\\
-\begin{tabular}{ |c|c| }
-\hline {\bf Model type}& {\bf Score}\\
-\hline Support Vector Machine & 0.757\\
-\hline Decision Tree & 0.749\\
-\hline Multinomial NB & 0.728\\
-\hline Gaussian NB & 0.707\\
-\hline
-\end{tabular}
-\end{center}
-
-\begin{center}
-Table 5: Representation comparison --- binary classification\\
-\begin{tabular}{ |c|c| }
-\hline {\bf Representation}& {\bf Score}\\
-\hline Bag of Words & 0.767\\
-\hline TF-IDF & 0.742\\
-\hline Frequency & 0.736\\
-\hline
-\end{tabular}
-\end{center}
-
-Using a Friedman Chi Squared test, the \emph{p}-value for table 3 is approximately 0, the \emph{p}-value for the different algorithms is $6.42 \times 10^{-33}$, and the \emph{p}-value for the different representations is $3.12 \times 10^{-29}$.
-
-\begin{center}
-Table 6: Machine learning model evaluations --- type classification\\
-\begin{tabular}{ |c|c|c| }
-\hline {\bf Model type} & {\bf Text representation} & {\bf Score} \\
-\hline Multinomial NB & TF-IDF & 0.612\\
-\hline Multinomial NB & BoW & 0.597\\
-\hline SVM & BoW & 0.594\\
-\hline Decision Tree & TF-IDF & 0.588\\
-\hline Decision Tree & Frequency & 0.576\\
-\hline SVM & Frequency & 0.556\\
-\hline Decision Tree & BoW & 0.550\\
-\hline Gaussian NB & BoW & 0.541\\
-\hline Gaussian NB & Frequency & 0.538\\
-\hline Gaussian NB & TF-IDF & 0.517\\
-\hline SVM & TF-IDF & 0.509\\
-\hline Multinomial NB & Frequency & 0.494\\
-\hline
-\end{tabular}
-\end{center}
-
-\begin{center}
-Table 7: Algorithm comparison --- type classification\\
-\begin{tabular}{ |c|c| }
-\hline {\bf Model type}& {\bf Score}\\
-\hline Multinomial NB & 0.606\\
-\hline Decision Tree & 0.585\\
-\hline Gaussian NB & 0.579\\
-\hline Support Vector Machine & 0.550\\
-\hline
-\end{tabular}
-\end{center}
-
-\begin{center}
-Table 8: Representation comparison --- type classification\\
-\begin{tabular}{ |c|c| }
-\hline {\bf Representation}& {\bf Score}\\
-\hline Bag of Words & 0.600\\
-\hline TF-IDF & 0.576\\
-\hline Frequency & 0.547\\
-\hline
-\end{tabular}
-\end{center}
-
-Using a Friedman Chi Squared test, the \emph{p}-value for table 6 is $4.29 \times 10^{-112}$, the \emph{p}-value for the different algorithms is $3.08 \times 10^{-28}$, and the \emph{p}-value for the different representations is $9.20 \times 10^{-16}$.
+Three machine learning models were used: SVMs, Decision Trees, and Naïve Bayes classifiers. Each of those models was used for Boolean and type classification and with three seperate text representations (Bag-of-Words, raw frequency, and TF-IDF), making a total of 18 models. The evaluation metric used was the arithmetic mean of the recall for each individual classification in order to account for large class imbalances in the initial dataset. The models were then grouped by algorithm type and text representation and the most common answer was taken to find the differences between the classes. After this, a Cochran Q test was performed on the results, and, if they were significant, a post-hoc Dunn test was used to find the precise differences between the model types. This process was done for each task. The result of these tests can be found in the \texttt{cochran.ipynb} file in the \texttt{ml-models} directory.
 
 \end{document}
