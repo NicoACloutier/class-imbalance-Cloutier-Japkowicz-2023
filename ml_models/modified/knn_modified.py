@@ -36,7 +36,7 @@ class ModifiedKNN:
         '''
         temp_inputs = np.copy(self.inputs)
         temp_inputs -= input_vector
-        temp_inputs = np.sqrt(temp_inputs.dot(temp_inputs))
+        temp_inputs = np.array([np.sqrt(x.dot(x)) for x in temp_inputs])
         temp_inputs /= self.output_modifiers
         
         indeces = np.argpartition(temp_inputs, self.k)[:k]
