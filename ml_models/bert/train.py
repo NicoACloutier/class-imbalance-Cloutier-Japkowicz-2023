@@ -66,9 +66,7 @@ def main():
             answers = test(test_df, model, tokenizer, task)
             all_answers = torch.cat([all_answers, answers])
         
-        all_answers -= np.mean(all_answers)
-        all_answers /= np.std(all_answers)
-        all_answers = np.argmax(all_answers)
+        all_answers = np.argmax(all_answers, axis=1)
         
         #write answers to file for analysis
         output_df = pd.read_csv(f'..\\{TASKS[task]}_predictions.csv')
