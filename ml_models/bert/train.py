@@ -21,8 +21,8 @@ def train(df, tokenizer, input_column, output_column):
 
     training_args = TrainingArguments(
         output_dir='test_trainer',
-        num_train_epochs=3,
-        save_steps=1000,
+        num_train_epochs=5,
+        save_steps=10000,
     )
 
     trainer = Trainer(
@@ -47,7 +47,7 @@ def main():
     df = pd.read_csv(DATA_FILE)
     df['text'] = df['text'].astype(str)
     jump = len(df) // NUM_SPLITS
-    all_answers = []
+    all_answers = torch.Tensor()
 
     for task in ['classification', 'type_of_antisemitism']:
     
