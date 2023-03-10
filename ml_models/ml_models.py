@@ -2,7 +2,6 @@ import pandas as pd
 from sklearn import tree, svm, naive_bayes
 import string, collections, math
 import nltk
-import pickle
 from transformers import AutoTokenizer, AutoModel
 import time
 import numpy as np
@@ -40,11 +39,9 @@ def clean(text):
         text = text.replace(f' {stopword} ', ' ')
     return text
     
-#fit a model, save to file, and test
+#fit a model and test
 def fit_save_test(model, model_name, train_input, train_output, test_input):
     model.fit(train_input, train_output)
-    filename = f'{MODEL_DIR}\\{model_name}.sav'
-    pickle.dump(model, open(filename, 'wb'))
     predictions = model.predict(test_input)
     return predictions
     
