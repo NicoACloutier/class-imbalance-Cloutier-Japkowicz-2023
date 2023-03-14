@@ -5,6 +5,8 @@ import nltk
 from transformers import AutoTokenizer, AutoModel
 import time
 import numpy as np
+import xgboost
+from imblearn.combine import SMOTETomek
 
 BASIC = '..\\data'
 MODEL_DIR = '.\\models'
@@ -94,6 +96,9 @@ def train_representations(train_input, train_output, test_input,
     temp_test_input = test_input.apply(lambda x: rep_func(x, rep_list)).values.tolist()
     temp_test_output = test_output.values.tolist()
     
+    smt = SMOTETomek(random_state=42, sampling_strategy='minority', n_jobs=-1)
+    temp_train_input, temp_train_output = smt.fit_resample(temp_train_input, temp_train_output)
+    
     finish = time.time()
     period = finish - begin
     print(f'{rep_name} representations finished in {period:.2f} seconds.')
@@ -145,7 +150,7 @@ def train_and_test(train_input, train_output, test_input,
     algorithms = [{'name': 'decision-tree', 'model': tree.DecisionTreeClassifier()}, #algorithms for classification
                   {'name': 'svm', 'model': svm.SVC()},
                   {'name': 'naive-bayes', 'model': naive_bayes.GaussianNB()},
-                  {'name': 'naive-bayes-multinomial', 'model': naive_bayes.MultinomialNB()}]
+                  {'name': 'xgboost', 'model': xgboost.XGBClassfier()}]
     
     for rep_method in rep_methods:
         temp_predictions = dict_concat(train_representations(train_input, train_output, test_input, test_output, 
