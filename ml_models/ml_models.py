@@ -6,13 +6,20 @@ from transformers import AutoTokenizer, AutoModel
 import time
 import numpy as np
 import xgboost
-from imblearn.combine import SMOTETomek
+from imblearn import combine, oversampling, undersampling
 
 BASIC = '..\\data'
 MODEL_DIR = '.\\models'
 NUMBER_PARTITIONS = 10
 COLUMNS = ['Algorithm', 'Representation', 'Task', 'Score', 'Partition']
 BERT_NAME = 'bert-base-uncased'
+OUTPUT_DIR = '.\\predictions'
+
+methods = {'SMOTETomek': combine.SMOTETomek, 
+           'RandomOver': oversampling.RandomOverSampler, 
+           'ADASYN': oversampling.ADASYN,
+           'RandomUnder': undersampling.RandomUnderSampler,
+           'none': None,}
 
 value_or_zero = lambda x, dict: 0 if not x in dict else dict[x] #return dictionary value if key in dictionary, otherwise return 0
 delete_punctuation = lambda x: ''.join([char for char in x if char not in string.punctuation]) #delete punctuation from string
@@ -80,7 +87,7 @@ def bert(text, model_tokenizer):
 #train all algorithms on a single representation method and single partition,
 #update report df
 def train_representations(train_input, train_output, test_input, 
-                          test_output, rep_method, algorithms, partition, task):
+                          test_output, rep_method, algorithms, partition, task, resampling_method):
     
     temp_predictions = dict()
     
@@ -96,9 +103,9 @@ def train_representations(train_input, train_output, test_input,
     temp_test_input = test_input.apply(lambda x: rep_func(x, rep_list)).values.tolist()
     temp_test_output = test_output.values.tolist()
     
-    smt = SMOTETomek(random_state=42, sampling_strategy='minority', n_jobs=-1)
-    temp_train_input, temp_train_output = smt.fit_resample(temp_train_input, temp_train_output)
-    
+    if resampling_method != 'none':
+        temp_train_input, temp_train_output = methods[resampling_method]().fit_resample(temp_train_input, temp_train_output)
+
     finish = time.time()
     period = finish - begin
     print(f'{rep_name} representations finished in {period:.2f} seconds.')
@@ -125,7 +132,7 @@ def train_representations(train_input, train_output, test_input,
     
 #given a single partition, train and test each model with each rep method
 def train_and_test(train_input, train_output, test_input, 
-                   test_output, partition, task):
+                   test_output, partition, task, resampling_method):
     temp_predictions = dict()
     
     #get wordlist
@@ -150,17 +157,17 @@ def train_and_test(train_input, train_output, test_input,
     algorithms = [{'name': 'decision-tree', 'model': tree.DecisionTreeClassifier()}, #algorithms for classification
                   {'name': 'svm', 'model': svm.SVC()},
                   {'name': 'naive-bayes', 'model': naive_bayes.GaussianNB()},
-                  {'name': 'xgboost', 'model': xgboost.XGBClassfier()}]
+                  {'name': 'xgboost', 'model': xgboost.XGBClassifier()}]
     
     for rep_method in rep_methods:
         temp_predictions = dict_concat(train_representations(train_input, train_output, test_input, test_output, 
-                                       rep_method, algorithms, partition, task), temp_predictions)
+                                       rep_method, algorithms, partition, task), temp_predictions, resampling_method)
     
     return temp_predictions
 
 #perform the entire process of training all models with all representations across all partitions,
 #only for one task
-def process_fit_test(df, output):
+def process_fit_test(df, output, resampling_method):
     prediction_dict = dict()
 
     length = len(df)
@@ -182,7 +189,7 @@ def process_fit_test(df, output):
         test_output = test_df[output]
     
         prediction_dict = append_dict_values(train_and_test(train_input, train_output, test_input, 
-                                                            test_output, partition, output), prediction_dict)
+                                                            test_output, partition, output), prediction_dict, resampling_method)
     
     predictions_df = pd.DataFrame(prediction_dict)
     
@@ -190,17 +197,19 @@ def process_fit_test(df, output):
 
 def main():
 
-    #Data preprocessing
-    df = pd.read_csv(f'{BASIC}\\antisemitism_dataset.csv')
-    df['text'] = df['text'].apply(clean).astype(str)
-    df = df[df['text'].apply(lambda x: len(x.split()) >= 1)]
-    
-    binary_predictions_df = process_fit_test(df, 'classification')
-    binary_predictions_df.to_csv('binary_predictions.csv', index=False)
-    
-    df = df[df['classification'] == 1]
-    type_predictions_df = process_fit_test(df, 'type_of_antisemitism')
-    type_predictions_df.to_csv('type_predictions.csv', index=False)
+    for resampling_method in methods:
+        print(f'\n\n{resampling_method}\n\n')
+        #Data preprocessing
+        df = pd.read_csv(f'{BASIC}\\antisemitism_dataset.csv')
+        df['text'] = df['text'].apply(clean).astype(str)
+        df = df[df['text'].apply(lambda x: len(x.split()) >= 1)]
+        
+        binary_predictions_df = process_fit_test(df, 'classification', resampling_method)
+        binary_predictions_df.to_csv(f'{OUTPUT_DIR}\\binary_predictions-{resampling_method}.csv', index=False)
+        
+        df = df[df['classification'] == 1]
+        type_predictions_df = process_fit_test(df, 'type_of_antisemitism', resampling_method)
+        type_predictions_df.to_csv(f'{OUTPUT_DIR}\\type_predictions-{resampling_method}.csv', index=False)
 
 if __name__ == '__main__':
     main()
