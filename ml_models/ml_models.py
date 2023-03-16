@@ -2,11 +2,10 @@ import pandas as pd
 from sklearn import tree, svm, naive_bayes
 import string, collections, math
 import nltk
-from transformers import AutoTokenizer, AutoModel
 import time
 import numpy as np
 import xgboost
-from imblearn import combine, oversampling, undersampling
+import imblearn
 
 BASIC = '..\\data'
 MODEL_DIR = '.\\models'
@@ -15,10 +14,10 @@ COLUMNS = ['Algorithm', 'Representation', 'Task', 'Score', 'Partition']
 BERT_NAME = 'bert-base-uncased'
 OUTPUT_DIR = '.\\predictions'
 
-methods = {'SMOTETomek': combine.SMOTETomek, 
-           'RandomOver': oversampling.RandomOverSampler, 
-           'ADASYN': oversampling.ADASYN,
-           'RandomUnder': undersampling.RandomUnderSampler,
+methods = {'SMOTETomek': imblearn.combine.SMOTETomek, 
+           'RandomOver': imblearn.over_sampling.RandomOverSampler,
+           'ADASYN': imblearn.over_sampling.ADASYN,
+           'RandomUnder': imblearn.under_sampling.RandomUnderSampler,
            'none': None,}
 
 value_or_zero = lambda x, dict: 0 if not x in dict else dict[x] #return dictionary value if key in dictionary, otherwise return 0
@@ -74,13 +73,6 @@ def tfidf(text, word_dict):
     length = len(text)
     frequencies = [value_or_zero(word, counter)/length for word in word_dict]
     return [word_dict[word] * frequencies[i] for (i, word) in enumerate(word_dict)]
-
-#represent text with bert output, model_tokenizer is tuple with model and tokenizer
-def bert(text, model_tokenizer):
-    model, tokenizer = model_tokenizer
-    text = tokenizer(text, max_length=20, padding='max_length', truncation=True, return_tensors='pt')['input_ids']
-    output = np.squeeze(model(text).pooler_output.detach().numpy())
-    return sigmoid(output)
     
 #/WORD REPRESENTATIONS
     
@@ -103,7 +95,9 @@ def train_representations(train_input, train_output, test_input,
     temp_test_input = test_input.apply(lambda x: rep_func(x, rep_list)).values.tolist()
     temp_test_output = test_output.values.tolist()
     
-    if resampling_method != 'none':
+    if resampling_method == 'ADASYN':
+        temp_train_input, temp_train_output = methods[resampling_method](sampling_strategy='minority').fit_resample(temp_train_input, temp_train_output)
+    elif resampling_method != 'none':
         temp_train_input, temp_train_output = methods[resampling_method]().fit_resample(temp_train_input, temp_train_output)
 
     finish = time.time()
@@ -146,11 +140,7 @@ def train_and_test(train_input, train_output, test_input,
         value = math.log(num_words/all_text_counter[word])
         word_dict[word] = value
     
-    model = AutoModel.from_pretrained(BERT_NAME)
-    tokenizer = AutoTokenizer.from_pretrained(BERT_NAME)
-    
-    rep_methods = [{'name': 'bert', 'function': bert, 'wordlist': (model, tokenizer)},
-                   {'name': 'bow', 'function': bow, 'wordlist': wordlist}, #methods for representing text
+    rep_methods = [{'name': 'bow', 'function': bow, 'wordlist': wordlist}, #methods for representing text
                    {'name': 'freq', 'function': freq, 'wordlist': wordlist},
                    {'name': 'tfidf', 'function': tfidf, 'wordlist': word_dict},]
     
@@ -161,7 +151,7 @@ def train_and_test(train_input, train_output, test_input,
     
     for rep_method in rep_methods:
         temp_predictions = dict_concat(train_representations(train_input, train_output, test_input, test_output, 
-                                       rep_method, algorithms, partition, task), temp_predictions, resampling_method)
+                                       rep_method, algorithms, partition, task, resampling_method), temp_predictions)
     
     return temp_predictions
 
@@ -189,7 +179,7 @@ def process_fit_test(df, output, resampling_method):
         test_output = test_df[output]
     
         prediction_dict = append_dict_values(train_and_test(train_input, train_output, test_input, 
-                                                            test_output, partition, output), prediction_dict, resampling_method)
+                                                            test_output, partition, output, resampling_method), prediction_dict)
     
     predictions_df = pd.DataFrame(prediction_dict)
     
