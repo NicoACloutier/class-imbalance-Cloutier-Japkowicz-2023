@@ -35,7 +35,7 @@ def main():
             generation = model.generate(encoding, max_length=25, do_sample=True, min_new_tokens=5, length_penalty=1, temperature=temp, top_k=10)
             text = tokenizer.decode(generation[0], skip_special_tokens=True)
             text = text.replace('\n', ' ')
-            final_texts += text
+            final_texts.append(text)
     
     classifications = multiply(list(df['classification'].astype(int)), NUM_TEMPS)
     types = multiply(list(df['type_of_antisemitism'].astype(int)), NUM_TEMPS)
