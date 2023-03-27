@@ -1,6 +1,5 @@
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 import transformers
-import numpy as np
 import pandas as pd
 import string
 
@@ -13,10 +12,10 @@ delete_punctuation = lambda x: ''.join([char for char in x if char not in [strin
 
 #multiply each item of an array a certain number of times
 def multiply(list, times_over):
-    array = np.vstack(np.array(list) * times_over)
-    array = array.T
-    array = np.concat(array)
-    return array
+    final_list = []
+    for item in list_array:
+      final_list += [item for _ in range(times_over)]
+    return final_list
 
 def main():
     transformers.utils.logging.set_verbosity_error()
