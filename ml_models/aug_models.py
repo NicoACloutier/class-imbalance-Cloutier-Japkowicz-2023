@@ -45,7 +45,7 @@ def clean(text):
     return text
     
 #fit a model and test
-def fit_save_test(model, model_name, train_input, train_output, test_input):
+def fit_test(model, model_name, train_input, train_output, test_input):
     model.fit(train_input, train_output)
     predictions = model.predict(test_input)
     return predictions
@@ -109,9 +109,9 @@ def train_representations(train_input, train_output, test_input,
         algo_name = algorithm['name']
         algo_model = algorithm['model']
     
-        predictions = list(fit_save_test(algo_model, f'{algo_name}-{rep_name}-{task}', 
-                                         temp_train_input, temp_train_output,
-                                         temp_test_input))
+        predictions = list(fit_test(algo_model, f'{algo_name}-{rep_name}-{task}', 
+                                    temp_train_input, temp_train_output,
+                                    temp_train_input))
         
         temp_predictions[f'{algo_name}-{rep_name}-{task}'] = predictions
         
@@ -157,19 +157,24 @@ def train_and_test(train_input, train_output, test_input,
 
 #perform the entire process of training all models with all representations across all partitions,
 #only for one task
-def process_fit_test(df, output, resampling_method):
+def process_fit_test(df, test_df, output, resampling_method):
     prediction_dict = dict()
 
     length = len(df)
     jump = length // NUMBER_PARTITIONS #value increased each partition
+    test_jump = len(test_df) // NUMBER_PARTITIONS
     for partition in range(NUMBER_PARTITIONS):
         print(f'\nPARTITION NUMBER {partition+1}.\n')
     
         begin = partition * jump
         end = (partition+1) * jump
         
-        test_df = df.iloc[begin:end]
-        train_df = df.drop(test_df.index)
+        test_begin = partition * test_jump
+        test_end = (partition+1) * test_jump
+        
+        to_drop = df.iloc[begin:end]
+        train_df = df.drop(to_drop.index)
+        test_df = test_df.iloc[test_begin:test_end]
         test_df = test_df.reset_index()
         train_df = train_df.reset_index()
 
@@ -193,7 +198,13 @@ def main():
     df['type'] = df['type'].apply(lambda x: 0 if x != x else x)
     df['type'] = df.apply(lambda x: x[1] + x[2], axis=1)
     
-    binary_predictions_df = process_fit_test(df, 'type', 'RandomUnder')
+    test_df = df.read_csv(f'{BASIC}\\antisemitism_dataset.csv')
+    test_df['text'] = test_df['text'].apply(clean).astype(str)
+    test_df = test_df[test_df['text'].apply(lambda x: len(x.split()) >= 1)]
+    test_df['type'] = test_df['type'].apply(lambda x: 0 if x != x else x)
+    test_df['type'] = test_df.apply(lambda x: x[1] + x[2], axis=1)
+    
+    binary_predictions_df = process_fit_test(df, test_df, 'type', 'RandomUnder')
     binary_predictions_df.to_csv(f'{OUTPUT_DIR}\\type_predictions-aug.csv', index=False)
 
 if __name__ == '__main__':
