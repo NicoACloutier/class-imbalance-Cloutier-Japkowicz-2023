@@ -33,7 +33,7 @@ def dict_concat(dict1, dict2):
 def append_dict_values(dict1, dict2):
     for key in dict1:
         if key in dict2:
-            dict1[key] = dict1[key] + dict2[key]
+            dict1[key] = list(dict1[key]) + list(dict2[key])
     return dict1
 
 #remove stopwords from text, put in lowercase, and delete punctuation
@@ -111,7 +111,7 @@ def train_representations(train_input, train_output, test_input,
     
         predictions = list(fit_test(algo_model, f'{algo_name}-{rep_name}-{task}', 
                                     temp_train_input, temp_train_output,
-                                    temp_train_input))
+                                    temp_test_input))
         
         temp_predictions[f'{algo_name}-{rep_name}-{task}'] = predictions
         
@@ -125,7 +125,7 @@ def train_representations(train_input, train_output, test_input,
 def train_and_test(train_input, train_output, test_input, 
                    test_output, partition, task, resampling_method):
     temp_predictions = dict()
-    
+        
     #get wordlist
     all_text = ' '.join(list(train_input) + list(test_input))
     all_text_split = all_text.split()
@@ -174,15 +174,16 @@ def process_fit_test(df, test_df, output, resampling_method):
         
         to_drop = df.iloc[begin:end]
         train_df = df.drop(to_drop.index)
-        test_df = test_df.iloc[test_begin:test_end]
-        test_df = test_df.reset_index()
-        train_df = train_df.reset_index()
+        temp_test_df = test_df.iloc[test_begin:test_end]
+        temp_test_df = temp_test_df.reset_index(drop=True)
+        train_df = train_df.reset_index(drop=True)
 
         train_input = train_df['text']
         train_output = train_df[output]
-        test_input = test_df['text']
-        test_output = test_df[output]
-    
+        
+        test_input = temp_test_df['text']
+        test_output = temp_test_df[output]
+        
         prediction_dict = append_dict_values(train_and_test(train_input, train_output, test_input, 
                                                             test_output, partition, output, resampling_method), prediction_dict)
     
@@ -195,18 +196,21 @@ def main():
     df = pd.read_csv(f'{BASIC}\\augmented_dataset.csv')
     df['text'] = df['text'].apply(clean).astype(str)
     df = df[df['text'].apply(lambda x: len(x.split()) >= 1)]
-    df['type'] = df['type'].apply(lambda x: 0 if x != x else x)
-    df['type'] = df.apply(lambda x: x[1] + x[2], axis=1)
     
-    test_df = df.read_csv(f'{BASIC}\\antisemitism_dataset.csv')
+    test_df = pd.read_csv(f'{BASIC}\\antisemitism_dataset.csv')
     test_df['text'] = test_df['text'].apply(clean).astype(str)
     test_df = test_df[test_df['text'].apply(lambda x: len(x.split()) >= 1)]
-    test_df['type'] = test_df['type'].apply(lambda x: 0 if x != x else x)
-    test_df['type'] = test_df.apply(lambda x: x[1] + x[2], axis=1)
+    test_df['type'] = test_df['type_of_antisemitism']
     
-    binary_predictions_df = process_fit_test(df, test_df, 'type', 'RandomUnder')
-    binary_predictions_df.to_csv(f'{OUTPUT_DIR}\\type_predictions-aug.csv', index=False)
-
+    binary_predictions_df = process_fit_test(df, test_df, 'classification', 'RandomUnder')
+    binary_predictions_df.to_csv(f'{OUTPUT_DIR}\\binary_predictions-aug.csv', index=False)
+    
+    df = df[df['classification'] == 1]
+    test_df = test_df[test_df['classification'] == 1]
+    
+    type_predictions_df = process_fit_test(df, test_df, 'type', 'RandomUnder')
+    type_predictions_df.to_csv(f'{OUTPUT_DIR}\\type_predictions-aug.csv', index=False)
+    
 if __name__ == '__main__':
     main()
 

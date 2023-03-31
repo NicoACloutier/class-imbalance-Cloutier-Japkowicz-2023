@@ -10,6 +10,7 @@ import imblearn
 BASIC = '..\\data'
 MODEL_DIR = '.\\models'
 NUMBER_PARTITIONS = 10
+THRESHOLD_PCT = 0.5
 COLUMNS = ['Algorithm', 'Representation', 'Task', 'Score', 'Partition']
 BERT_NAME = 'bert-base-uncased'
 OUTPUT_DIR = '.\\predictions'
@@ -135,6 +136,15 @@ def train_and_test(train_input, train_output, test_input,
     all_text_counter = collections.Counter(all_text_split)
     wordlist = list(set(all_text_split))
     num_words = len(wordlist)
+    
+    words_to_delete = []
+    for word in wordlist:
+        if all_text_counter[word]*100/num_words < THRESHOLD_PCT:
+            words_to_delete.append(word)
+    for word in words_to_delete:
+        wordlist.remove(word)
+    num_words = len(wordlist)
+    
     word_dict = dict()
     for word in wordlist:
         value = math.log(num_words/all_text_counter[word])
