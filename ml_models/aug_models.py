@@ -113,7 +113,7 @@ def train_representations(train_input, train_output, test_input,
                                     temp_train_input, temp_train_output,
                                     temp_test_input))
         
-        temp_predictions[f'{algo_name}-{rep_name}-{task}'] = predictions
+        temp_predictions[f'{algo_name}-{rep_name}'] = predictions
         
         end = time.time()
         elapsed = end - start
@@ -142,7 +142,14 @@ def train_and_test(train_input, train_output, test_input,
         wordlist.remove(word)
     num_words = len(wordlist)
     
-    rep_methods = [{'name': 'freq', 'function': freq, 'wordlist': wordlist},]
+    word_dict = dict()
+    for word in wordlist:
+        value = math.log(num_words/all_text_counter[word])
+        word_dict[word] = value
+    
+    rep_methods = [{'name': 'bow', 'function': bow, 'wordlist': wordlist}, #methods for representing text
+                   {'name': 'freq', 'function': freq, 'wordlist': wordlist},
+                   {'name': 'tfidf', 'function': tfidf, 'wordlist': word_dict},]
     
     algorithms = [{'name': 'decision-tree', 'model': tree.DecisionTreeClassifier()}, #algorithms for classification
                   {'name': 'svm', 'model': svm.SVC()},

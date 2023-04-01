@@ -117,7 +117,7 @@ def train_representations(train_input, train_output, test_input,
                                          temp_train_input, temp_train_output,
                                          temp_test_input))
         
-        temp_predictions[f'{algo_name}-{rep_name}-{task}'] = predictions
+        temp_predictions[f'{algo_name}-{rep_name}'] = predictions
         
         end = time.time()
         elapsed = end - start
