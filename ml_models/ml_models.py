@@ -53,6 +53,14 @@ def fit_save_test(model, model_name, train_input, train_output, test_input):
     model.fit(train_input, train_output)
     predictions = model.predict(test_input)
     return predictions
+
+#add the classification and types columns to each other in the place of the type column, replace NAs with 0
+def combine_answers(df):
+    df = df.fillna(0)
+    columns = list(df.columns.values)
+    type, classification = columns.index('type_of_antisemitism'), columns.index('classification')
+    df['type_of_antisemitism'] = df.apply(lambda x: x[type] + x[classification], axis=1)
+    return df
     
 #WORD REPRESENTATIONS
 
@@ -207,7 +215,7 @@ def main():
         binary_predictions_df = process_fit_test(df, 'classification', resampling_method)
         binary_predictions_df.to_csv(f'{OUTPUT_DIR}\\binary_predictions-{resampling_method}.csv', index=False)
         
-        df = df[df['classification'] == 1]
+        df = combine_answers(df)
         type_predictions_df = process_fit_test(df, 'type_of_antisemitism', resampling_method)
         type_predictions_df.to_csv(f'{OUTPUT_DIR}\\type_predictions-{resampling_method}.csv', index=False)
 

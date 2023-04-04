@@ -50,6 +50,14 @@ def fit_test(model, model_name, train_input, train_output, test_input):
     predictions = model.predict(test_input)
     return predictions
     
+#add the classification and types columns to each other in the place of the type column, replace NAs with 0
+def combine_answers(df):
+    df = df.fillna(0)
+    columns = list(df.columns.values)
+    type, classification = columns.index('type'), columns.index('classification')
+    df['type'] = df.apply(lambda x: x[type] + x[classification], axis=1)
+    return df
+    
 #WORD REPRESENTATIONS
 
 #represent text with bag of words
@@ -212,8 +220,9 @@ def main():
     binary_predictions_df = process_fit_test(df, test_df, 'classification', 'RandomUnder')
     binary_predictions_df.to_csv(f'{OUTPUT_DIR}\\binary_predictions-aug.csv', index=False)
     
-    df = df[df['classification'] == 1]
-    test_df = test_df[test_df['classification'] == 1]
+    #prepare dfs for type classification
+    df = combine_columns(df)
+    test_df = combine_columns(test_df)
     
     type_predictions_df = process_fit_test(df, test_df, 'type', 'RandomUnder')
     type_predictions_df.to_csv(f'{OUTPUT_DIR}\\type_predictions-aug.csv', index=False)
