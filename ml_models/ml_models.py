@@ -212,12 +212,19 @@ def main():
         df['text'] = df['text'].apply(clean).astype(str)
         df = df[df['text'].apply(lambda x: len(x.split()) >= 1)]
         
+        #binary classification task
         binary_predictions_df = process_fit_test(df, 'classification', resampling_method)
         binary_predictions_df.to_csv(f'{OUTPUT_DIR}\\binary_predictions-{resampling_method}.csv', index=False)
         
+        #4 type classification task
+        temp_df = df[df['classification'] == 1]
+        type4_predictions_df = process_fit_test(temp_df 'type_of_antisemitism', resampling_method)
+        type4_predictions_df.to_csv(f'{OUTPUT_DIR}\\4type_predictions-{resampling_method}.csv', index=False)
+        
+        #5 type classification task
         df = combine_answers(df)
-        type_predictions_df = process_fit_test(df, 'type_of_antisemitism', resampling_method)
-        type_predictions_df.to_csv(f'{OUTPUT_DIR}\\type_predictions-{resampling_method}.csv', index=False)
+        type5_predictions_df = process_fit_test(df, 'type_of_antisemitism', resampling_method)
+        type5_predictions_df.to_csv(f'{OUTPUT_DIR}\\5type_predictions-{resampling_method}.csv', index=False)
 
 if __name__ == '__main__':
     main()

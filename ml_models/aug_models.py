@@ -217,15 +217,21 @@ def main():
     test_df = test_df[test_df['text'].apply(lambda x: len(x.split()) >= 1)]
     test_df['type'] = test_df['type_of_antisemitism']
     
+    #binary task
     binary_predictions_df = process_fit_test(df, test_df, 'classification', 'RandomUnder')
     binary_predictions_df.to_csv(f'{OUTPUT_DIR}\\binary_predictions-aug.csv', index=False)
     
-    #prepare dfs for type classification
-    df = combine_columns(df)
-    test_df = combine_columns(test_df)
+    #4 type classification task
+    temp_df = df[df['classification'] == 1]
+    temp_test_df = test_df[test_df['classification'] == 1]
+    type4_predictions_df = process_fit_test(temp_df, test_test_df, 'type', 'RandomUnder')
+    type4_predictions_df.to_csv(f'{OUTPUT_DIR}\\4type_predictions-aug.csv', index=False)
     
-    type_predictions_df = process_fit_test(df, test_df, 'type', 'RandomUnder')
-    type_predictions_df.to_csv(f'{OUTPUT_DIR}\\type_predictions-aug.csv', index=False)
+    #5 type classification task
+    df = combine_answers(df)
+    test_df = combine_answers(test_df)
+    type5_predictions_df = process_fit_test(df, test_df, 'type', 'RandomUnder')
+    type5_predictions_df.to_csv(f'{OUTPUT_DIR}\\5type_predictions-aug.csv', index=False)
     
 if __name__ == '__main__':
     main()
