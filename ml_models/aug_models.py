@@ -224,7 +224,7 @@ def main():
     #4 type classification task
     temp_df = df[df['classification'] == 1]
     temp_test_df = test_df[test_df['classification'] == 1]
-    type4_predictions_df = process_fit_test(temp_df, test_test_df, 'type', 'RandomUnder')
+    type4_predictions_df = process_fit_test(temp_df, temp_test_df, 'type', 'RandomUnder')
     type4_predictions_df.to_csv(f'{OUTPUT_DIR}\\4type_predictions-aug.csv', index=False)
     
     #5 type classification task

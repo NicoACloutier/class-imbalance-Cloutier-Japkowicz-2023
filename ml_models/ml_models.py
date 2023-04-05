@@ -218,7 +218,7 @@ def main():
         
         #4 type classification task
         temp_df = df[df['classification'] == 1]
-        type4_predictions_df = process_fit_test(temp_df 'type_of_antisemitism', resampling_method)
+        type4_predictions_df = process_fit_test(temp_df, 'type_of_antisemitism', resampling_method)
         type4_predictions_df.to_csv(f'{OUTPUT_DIR}\\4type_predictions-{resampling_method}.csv', index=False)
         
         #5 type classification task
