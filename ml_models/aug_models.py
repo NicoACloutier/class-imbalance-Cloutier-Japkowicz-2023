@@ -83,8 +83,8 @@ def tfidf(text, word_dict):
     
 #train all algorithms on a single representation method and single partition,
 #update report df
-def train_representations(train_input, train_output, test_input, 
-                          test_output, rep_method, algorithms, partition, task, resampling_method):
+def train_representations(train_input, train_output, test_input, test_output, 
+                          rep_method, algorithms, partition, task, resampling_method, stratified_column):
     
     temp_predictions = dict()
     
@@ -100,10 +100,16 @@ def train_representations(train_input, train_output, test_input,
     temp_test_input = test_input.apply(lambda x: rep_func(x, rep_list)).values.tolist()
     temp_test_output = test_output.values.tolist()
     
+    #take care of column used for resampling
+    stratified_column = temp_train_output if stratified_column.empty else stratified_column.values.tolist()
+    
     if resampling_method == 'ADASYN':
-        temp_train_input, temp_train_output = methods[resampling_method](sampling_strategy='minority').fit_resample(temp_train_input, temp_train_output)
+        temp_train_input, temp_train_output = methods[resampling_method](sampling_strategy='minority').fit_resample(temp_train_input, stratified_column)
     elif resampling_method != 'none':
-        temp_train_input, temp_train_output = methods[resampling_method]().fit_resample(temp_train_input, temp_train_output)
+        temp_train_input, temp_train_output = methods[resampling_method]().fit_resample(temp_train_input, stratified_column)
+
+    if 'binary' in task:
+        temp_train_output = [int(x != 0) for x in temp_train_output] #turn multi-class classifications into binary if binary task
 
     finish = time.time()
     period = finish - begin
@@ -131,7 +137,7 @@ def train_representations(train_input, train_output, test_input,
     
 #given a single partition, train and test each model with each rep method
 def train_and_test(train_input, train_output, test_input, 
-                   test_output, partition, task, resampling_method):
+                   test_output, partition, task, resampling_method, stratified_column):
     temp_predictions = dict()
         
     #get wordlist
@@ -166,18 +172,25 @@ def train_and_test(train_input, train_output, test_input,
     
     for rep_method in rep_methods:
         temp_predictions = dict_concat(train_representations(train_input, train_output, test_input, test_output, 
-                                       rep_method, algorithms, partition, task, resampling_method), temp_predictions)
+                                       rep_method, algorithms, partition, task, resampling_method, stratified_column), 
+                                       temp_predictions)
     
     return temp_predictions
 
 #perform the entire process of training all models with all representations across all partitions,
 #only for one task
-def process_fit_test(df, test_df, output, resampling_method):
+def process_fit_test(df, test_df, output, resampling_method, stratified_column):
     prediction_dict = dict()
 
     length = len(df)
     jump = length // NUMBER_PARTITIONS #value increased each partition
     test_jump = len(test_df) // NUMBER_PARTITIONS
+    
+    if stratified_column:
+        stratified_column = df[stratified_column]
+    else:
+        stratified_column = pd.Series(dtype='float64')
+    
     for partition in range(NUMBER_PARTITIONS):
         print(f'\nPARTITION NUMBER {partition+1}.\n')
     
@@ -190,6 +203,11 @@ def process_fit_test(df, test_df, output, resampling_method):
         to_drop = df.iloc[begin:end]
         train_df = df.drop(to_drop.index)
         temp_test_df = test_df.iloc[test_begin:test_end]
+        if stratified_column.empty:
+            temp_stratified_column = stratified_column.copy()
+        else:
+            temp_stratified_column = stratified_column.drop(to_drop.index)
+        
         temp_test_df = temp_test_df.reset_index(drop=True)
         train_df = train_df.reset_index(drop=True)
 
@@ -199,8 +217,8 @@ def process_fit_test(df, test_df, output, resampling_method):
         test_input = temp_test_df['text']
         test_output = temp_test_df[output]
         
-        prediction_dict = append_dict_values(train_and_test(train_input, train_output, test_input, 
-                                                            test_output, partition, output, resampling_method), prediction_dict)
+        prediction_dict = append_dict_values(train_and_test(train_input, train_output, test_input, test_output, partition, 
+                                                            output, resampling_method, temp_stratified_column), prediction_dict)
     
     predictions_df = pd.DataFrame(prediction_dict)
     
@@ -211,26 +229,32 @@ def main():
     df = pd.read_csv(f'{BASIC}\\augmented_dataset.csv')
     df['text'] = df['text'].apply(clean).astype(str)
     df = df[df['text'].apply(lambda x: len(x.split()) >= 1)]
+    df = df.fillna(0)
     
     test_df = pd.read_csv(f'{BASIC}\\antisemitism_dataset.csv')
     test_df['text'] = test_df['text'].apply(clean).astype(str)
     test_df = test_df[test_df['text'].apply(lambda x: len(x.split()) >= 1)]
     test_df['type'] = test_df['type_of_antisemitism']
+    test_df = test_df.fillna(0)
     
     #binary task
-    binary_predictions_df = process_fit_test(df, test_df, 'classification', 'RandomUnder')
+    binary_predictions_df = process_fit_test(df, test_df, 'classification', 'RandomUnder', None)
     binary_predictions_df.to_csv(f'{OUTPUT_DIR}\\binary_predictions-aug.csv', index=False)
+    
+    #stratified binary task
+    binary_predictions_df = process_fit_test(df, test_df, 'classification', 'RandomUnder', 'type')
+    binary_predictions_df.to_csv(f'{OUTPUT_DIR}\\strat-binary_predictions-aug.csv', index=False)
     
     #4 type classification task
     temp_df = df[df['classification'] == 1]
     temp_test_df = test_df[test_df['classification'] == 1]
-    type4_predictions_df = process_fit_test(temp_df, temp_test_df, 'type', 'RandomUnder')
+    type4_predictions_df = process_fit_test(temp_df, temp_test_df, 'type', 'RandomUnder', None)
     type4_predictions_df.to_csv(f'{OUTPUT_DIR}\\4type_predictions-aug.csv', index=False)
     
     #5 type classification task
     df = combine_answers(df)
     test_df = combine_answers(test_df)
-    type5_predictions_df = process_fit_test(df, test_df, 'type', 'RandomUnder')
+    type5_predictions_df = process_fit_test(df, test_df, 'type', 'RandomUnder', None)
     type5_predictions_df.to_csv(f'{OUTPUT_DIR}\\5type_predictions-aug.csv', index=False)
     
 if __name__ == '__main__':
