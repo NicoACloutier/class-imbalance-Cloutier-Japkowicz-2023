@@ -111,7 +111,7 @@ def train_representations(train_input, train_output, test_input, test_output,
     elif resampling_method != 'none':
         temp_train_input, temp_train_output = methods[resampling_method]().fit_resample(temp_train_input, stratified_column)
     
-    if 'binary' in task:
+    if 'classification' in task:
         temp_train_output = [int(x != 0) for x in temp_train_output] #turn multi-class classifications into binary if binary task
 
     finish = time.time()
