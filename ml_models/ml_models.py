@@ -83,6 +83,17 @@ def tfidf(text, word_dict):
     return [word_dict[word] * frequencies[i] for (i, word) in enumerate(word_dict)]
     
 #/WORD REPRESENTATIONS
+
+#resample a dataset with a resampling method
+def resample(inputs, outputs, resampling_method):
+    try:
+        if resampling_method == 'ADASYN':
+            inputs, outputs = methods[resampling_method](sampling_strategy='minority').fit_resample(inputs, outputs)
+        elif resampling_method != 'none':
+            inputs, outputs = methods[resampling_method]().fit_resample(inputs, outputs)
+    except ValueError: #sometimes it won't generate any samples, which gives a value error. In that case, return original.
+        pass
+    return inputs, outputs
     
 #train all algorithms on a single representation method and single partition,
 #update report df
@@ -105,14 +116,11 @@ def train_representations(train_input, train_output, test_input, test_output,
     
     #take care of column used for resampling
     stratified_column = temp_train_output if stratified_column.empty else stratified_column.values.tolist()
-    
-    if resampling_method == 'ADASYN':
-        temp_train_input, temp_train_output = methods[resampling_method](sampling_strategy='minority').fit_resample(temp_train_input, stratified_column)
-    elif resampling_method != 'none':
-        temp_train_input, temp_train_output = methods[resampling_method]().fit_resample(temp_train_input, stratified_column)
+    temp_train_input, temp_train_output = resample(temp_train_input, stratified_column, resampling_method)
     
     if 'classification' in task:
         temp_train_output = [int(x != 0) for x in temp_train_output] #turn multi-class classifications into binary if binary task
+        temp_train_input, temp_train_output = resample(temp_train_input, temp_train_output, resampling_method) #resample with binary
 
     finish = time.time()
     period = finish - begin
