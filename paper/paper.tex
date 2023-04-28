@@ -2,10 +2,10 @@
 \usepackage{graphicx}
 
 \begin{document}
-\title{Generative LLM resampling for the class imbalance problem with hate speech detection}
+\title{Generative LLM oversampling for the class imbalance problem in hate speech detection}
 \author{Nicolas Antonio Cloutier \and Nathalie Japkowicz\inst{1}}
 
-\institute{American University, Washington, D.C., USA} 
+\institute{1. American University, Washington, D.C., USA} 
 
 %research along the way
 %4/26: outline
@@ -28,26 +28,29 @@
 In recent years, hate speech has become increasingly mainstream and common within social media sites \cite{siegel}. This rise has not only caused online spaces to become less hospitable, but also had several offline effects. On top of having severe psychological effects on the recipient \cite{siegel}, online hate speech also played a roll in disseminating extremist anti-Rohingya voices leading to violence in Myanmar \cite{green}, and has provided motivation for several perpetrators of offline violent hate crimes \cite{siegel}. These events have motivated responses from numerous parties, including the social media sites themselves, that are increasingly looking to stop the spread of these messages \cite{ullmann}, and governmental bodies, that are seeking to regulate or prevent the spread of hate speech \cite{banks}. At the same time as hate speech has been becoming more common, social media sites have been generating more and more content, with popular social media site Twitter generating an average of 500 million tweets per day in 2019 \cite{pereira}.
 
 %P2: Introduce the need for automated methods of hate speech detection
-With these developments and the large amount of content on social media sites, these sites have been increasingly looking to automatic detection methods for hate speech \cite{ullmann}. These methods use Machine Learning (ML) to automatically detect and classify hateful speech, removing some of the work done by moderators, whose primary job is to respond reactively to user reports of hate speech \cite{ullmann}. Chandra et al. (2021) used a combination of image and text processing and classification algorithms to classify images and text on social media sites Twitter and Gab \cite{chandra}. We use their Twitter dataset to further analyze the presence of hate speech on Twitter and investigate new algorithms for classification.
+With these developments and the large amount of content on social media sites, these sites have been increasingly looking to automatic detection methods for hate speech \cite{ullmann}. These methods use Machine Learning (ML) to automatically detect and classify hateful speech, removing some of the work done by moderators, whose primary job is to respond reactively to user reports of hate speech \cite{ullmann}. Chandra et al. \cite{chandra} used a combination of image and text processing and classification algorithms to classify images and text on social media sites Twitter and Gab \cite{chandra}. We use their Twitter dataset to further analyze the presence of hate speech on Twitter and investigate new algorithms for classification.
 
 %P3: Introduce the imbalanced data issue
-One difficulty with this dataset is that it is imbalanced, meaning one classification is far more common in the dataset than another. Imbalanced data can negatively impact the performance of ML classification algorithms \cite{sun}, affecting numerous domains that use ML classification. Many ML algorithms are inadequately prepared to handle the class imbalance problem \cite{sun}, leading many to look to other solutions, including resampling methods, that in some way change the training data in order to allay the effects of the class imbalance problem \cite{japkowicz}.
+One difficulty with this dataset is that it is imbalanced, meaning one classification is far more common in the dataset than another. Imbalanced data can negatively impact the performance of ML classification algorithms \cite{sun}, affecting numerous domains that use ML classification. Many ML algorithms are inadequately prepared to handle the class imbalance problem \cite{sun}, leading many to look to other solutions, including resampling methods, that in some way change the training data by adding or removing data points in order to allay the effects of the class imbalance problem \cite{japkowicz}.
 
 %P4: Wrap up the research question and context
 With this in mind, there are two crucial research questions this paper seeks to answer. First: how can automatic ML methods be improved in the domain of text classification for hate speech detection? Second: how can the class imbalance problem be dealt with for text data? These are the questions we seek to provide answers to, with the hope that they may inform future research and hate speech detection systems.
 
 \section{Previous work}
-%P1: mention some papers on antisemitism detection
+%P1: mention big paper that you use
+Antisemitism detection, as well as hate speech detection generally, has been the subject of much research. Martins et al. \cite{martins} used ML models to analyze and classify antisemitism in posts on social media sites Gab and 4chan, and González-Pizarro and Zanettou \cite{gonzalez} used large language models (LLMs) to do the same. Chandra et al. \cite{chandra} introduced a new dataset of labeled antisemitic posts, including text and images. These posts were labeled not only for whether or not they are antisemitic, but also their type of antisemitism, with the researchers grouping antisemitic posts into political, economic, religious, and racial antisemitism, and trained models to classify both antisemitic status and type of antisemitism. This Twitter dataset is imbalanced, with the non-antisemitic class far outnumbering the antisemitic class, and with political and racial antisemitism being more common than religious and economic antisemitism.
 
-%P2: mention big paper that you use
+%P2: introduce previous work on class imbalance problem
+Imbalance is a common issue in ML classification problems. The class imbalance problem can severely negatively affect model predictive power, with the less common class (termed the ``minority class'') is often misclassified due to its low prevalence in the dataset relative to the larger class (the ``majority class'') \cite{abdelrahman}. This problem has affected fields as distinct as medicine, fraudulent call detection, and risk management \cite{sun}. Due to the severity with which this problem can limit model performance and its widespread nature, being seen in numerous distinct fields, it has become a focus of researchers as an area of improvement \cite{abdelrahman}, with numerous techniques being created to allay the effects of the problem.
 
-%P3: introduce previous work on class imbalance problem
+%P3: focus on resampling methods
+One such technique is resampling, altering the training data by adding new data points or taking existing data points away in order to improve model performance. Generally, there are two types of resampling: oversampling, which describes the process of adding synthetic data points to a dataset, and undersampling, which describes the process of removing existing data points from a dataset \cite{shelke}. Resampling techniques can improve the performance of ML models when trained on imbalanced data \cite{lee} \cite{khushi}, advancing the state of the field of ML in problems with unbalanced datasets.
 
 %P4: talk about generative models used in vision, tabular data
+One method for oversampling is the use of generative models, including generative adversarial networks (GANs) and autoencoders to generate synthetic data. These methods seek to match the distribution of the original dataset and create synthetic datapoints in accordance with that distribution \cite{hao}, with the goal of creating authentic synthetic examples for model training. They have achieved success in their applications to primarily computer vision and tabular data \cite{hao} \cite{engelmann} \cite{bellinger} \cite{dai}. Applications of these generative models to NLP do occur \cite{phung}, they are generally less common than applications to other areas. Natural language processing (NLP) tends to use more traditional statistical methods for oversampling such as SMOTE and random oversampling \cite{wijaya} \cite{glazkova}.
 
-%P5: focus on resampling methods
-
-%P6: talk about LLMs and their applications, find whether there is research done with LLMs on class imbalance
+%P5: talk about LLMs and their applications, find whether there is research done with LLMs on class imbalance
+While these advances in resampling have been occuring, similar advances have been made in generative LLMs, such as the GPT series of models from OpenAI, which have the ability to generate human-like text \cite{floridi} and been applied to patent claim generation \cite{hsiang}, healthcare education \cite{sallam}. These LLMs, despite their ability of producing authentic examples given prompts, have not been widely investigated as a method for oversampling text data.
 
 \section{Methodology}
 %P1: talk about the different tasks
@@ -85,21 +88,66 @@ With this in mind, there are two crucial research questions this paper seeks to 
 
 %P3: talk about implications for text data
 
-\begin{thebibliography}{6}
+\begin{thebibliography}{24}
+\bibitem{abdelrahman}
+Abd Elrahman, S. M., Abraham, A: A review of class imbalance problem. Journal of Network and Innovative Computing \textbf{1}, 332--340 (2013)
+
 \bibitem{banks}
 Banks, J.: Regulating hate speech online. International Review of Law, Computers and Technology \textbf{24}(3), 233--239 (2010)
 
+\bibitem{bellinger}
+Bellinger, C., Japkowicz, N., Drummond, C.: Synthetic oversampling for advanced radioactive threat detection. IEEE CONFERENCE ON MACHINE LEARNING AN APPLICATIONS 2015.
+
 \bibitem{chandra}
-Chandra, M., Pailla, D., Bhatia, H., Sanchawala, A., Gupta, M., Shrivastava, M., Kumaraguru, P.: ``Subverting the Jewtocracy'': Online Antisemitism Detection Using Multimodal Deep Learning.  ACM WEB SCIENCE CONFERENCE 2021, pp. 148-157. 
+Chandra, M., Pailla, D., Bhatia, H., Sanchawala, A., Gupta, M., Shrivastava, M., Kumaraguru, P.: ``Subverting the Jewtocracy'': Online Antisemitism Detection Using Multimodal Deep Learning. ACM WEB SCIENCE CONFERENCE 2021, pp. 148-157. 
+
+\bibitem{dai}
+Dai, W., Ng, K., Severson, K., Huan, W., Anderson, F., Stultz, C.: Generative oversampling with a contrastive variational autoencoder. IEEE INTERNATIONAL CONFERENCE ON DATA MINING 2019, pp. 101-109.
+
+\bibitem{engelmann}
+Engelmann, J., Lessmann, S.: Conditional Wasserstein GAN-based oversampling of tabular data for imbalanced learning. Expert Systems with Applications \textbf{174}, (2021)
+
+\bibitem{floridi}
+Floridi, L., Chiriatti, M.: GPT-3: Its nature, scope, limits, and consequences. Minds and Machines \textbf{30}, 681--694 (2020)
+
+\bibitem{glazkova}
+Glazkova, A.: A comparison of synthetic oversampling methods for multi-class text classification. \emph{arXiv preprint arXiv:2008.04636t}, (2020)
+
+\bibitem{gonzalez}
+González-Pizarro, F., Zannettou, S.: Understanding and detecting hateful content using contrastive learning. \emph{arXiv preprint arXiv:2201.08387}, (2022)
 
 \bibitem{green}
 Green, P., MacManus, T., De la Cour Venning, A.: Countdown to Annihilation: Genocide in Myanmar. International State of Crime Initiative, London (2015)
 
+\bibitem{hao}
+Hao, J., Wang, C., Zhang, H., Yang, G.: Annealing genetic GAN for minority oversampling. \emph{arXiv preprint}, (2020)
+
 \bibitem{japkowicz}
 Japkowicz, N., Shaju, S.: The class imbalance problem: A systematic study. Intelligent Data Analysis \textbf{6}(5), 429--449 (2002)
 
+\bibitem{khushi}
+Khushi, M., Shaukat, K., Alam, T. M., Hammed, I. A., Uddin, S., Luo, S., Yang, X., Consuelo Reyes, M.: A Comparitive Performance Analysis of Data Resampling Methods on Imbalance Medical Data. IEEE Access \textbf{9}, 109960--109975 (2021)
+
+\bibitem{hsiang} %the main author is also named lee, this is the second author
+Lee, J. S., Hsiang, J.: Patent Claim Generation by Fine-Tuning OpenAI GPT-2. World Patent Information \textbf{62}, (2020)
+
+\bibitem{lee}
+Lee, P. H.: Resampling methods improve the predictive power of modeling in class-imbalanced datasets. International Journal of Environmental Research and Public Health \textbf{11}(9), 9776--9789.
+
+\bibitem{martins}
+Martins, R., Gomes, M., Almeida, J. J., Novais, P., Henriques, P.: Hate speech classification in social media using emotional analysis. BRAZILIAN CONFERENCE ON INTELLIGENT SYSTEMS 2018, pp. 61-66
+
 \bibitem{pereira}
 Pereira-Kohatsu, J. C., Quijano-Sánchez, L., Liberatore, F., Camacho-Collados, M.: Detecting and Monitoring Hate Speech in Twitter. Sensors \textbf{19}(21), 4654--4691 (2019)
+
+\bibitem{phung}
+Phung, N. M., Mimura, M.: Evaluation of a cGAN Model and Random Seed Oversampling on Imbalanced JavaScript Datasets. Journal of Information Processing \textbf{30}, 591--600 (2022)
+
+\bibitem{sallam}
+Sallam, M.: The utility of ChatGPT as an example of large language models in healthcare education, research and practice: Systematic review on the future perspectives and potential limitations. \emph{medRxiv preprint}, (2023)
+
+\bibitem{shelke}
+Shelke, M. S., Deshmukh, P. R., Shandilya, V. K.: A review on imbalanced data handling using undersampling and oversampling technique. International Journal of Recent Trends in Engineering Research \textbf{3}(4), 444--449 (2017).
 
 \bibitem{siegel}
 Siegel, A.: Online Hate Speech. Social media and democracy: The state of the field, prospects for reform, 56--88 (2020).
@@ -110,6 +158,8 @@ Sun, Y., Wong, A., Kamel, M.: Classification of Imbalanced Data: A Review. Inter
 \bibitem{ullmann}
 Ullmann, S., Tomalin, M.: Quarantining online hate speech: technical and ethical perspectives. Ethics and Information Technology \textbf{22}, 69--80 (2020)
 
+\bibitem{wijaya}
+Wijaya, I. D., Putrada, A. G., Oktaria, D.: Overcoming Data Imbalance Problems in Sexual Harassment Classification with SMOTE. International Journal on Information and Communication Technology \textbf{8}(1), 20--29 (2022).
 
 \end{thebibliography}
 \end{document}
