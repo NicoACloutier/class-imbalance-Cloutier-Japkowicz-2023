@@ -1,0 +1,115 @@
+\documentclass[runningheads]{llncs}
+\usepackage{graphicx}
+
+\begin{document}
+\title{Generative LLM resampling for the class imbalance problem with hate speech detection}
+\author{Nicolas Antonio Cloutier \and Nathalie Japkowicz\inst{1}}
+
+\institute{American University, Washington, D.C., USA} 
+
+%research along the way
+%4/26: outline
+%4/27: introduction
+%4/28: previous work
+%4/29: methodology
+%4/30: results
+%5/1: discussion
+%5/2: conclusions
+%5/3: abstract and finalize bibliography
+
+\maketitle 
+
+\begin{abstract}
+
+\end{abstract}
+
+\section{Introduction}
+%P1: Introduce the issue of hate speech online
+In recent years, hate speech has become increasingly mainstream and common within social media sites \cite{siegel}. This rise has not only caused online spaces to become less hospitable, but also had several offline effects. On top of having severe psychological effects on the recipient \cite{siegel}, online hate speech also played a roll in disseminating extremist anti-Rohingya voices leading to violence in Myanmar \cite{green}, and has provided motivation for several perpetrators of offline violent hate crimes \cite{siegel}. These events have motivated responses from numerous parties, including the social media sites themselves, that are increasingly looking to stop the spread of these messages \cite{ullmann}, and governmental bodies, that are seeking to regulate or prevent the spread of hate speech \cite{banks}. At the same time as hate speech has been becoming more common, social media sites have been generating more and more content, with popular social media site Twitter generating an average of 500 million tweets per day in 2019 \cite{pereira}.
+
+%P2: Introduce the need for automated methods of hate speech detection
+With these developments and the large amount of content on social media sites, these sites have been increasingly looking to automatic detection methods for hate speech \cite{ullmann}. These methods use Machine Learning (ML) to automatically detect and classify hateful speech, removing some of the work done by moderators, whose primary job is to respond reactively to user reports of hate speech \cite{ullmann}. Chandra et al. (2021) used a combination of image and text processing and classification algorithms to classify images and text on social media sites Twitter and Gab \cite{chandra}. We use their Twitter dataset to further analyze the presence of hate speech on Twitter and investigate new algorithms for classification.
+
+%P3: Introduce the imbalanced data issue
+One difficulty with this dataset is that it is imbalanced, meaning one classification is far more common in the dataset than another. Imbalanced data can negatively impact the performance of ML classification algorithms \cite{sun}, affecting numerous domains that use ML classification. Many ML algorithms are inadequately prepared to handle the class imbalance problem \cite{sun}, leading many to look to other solutions, including resampling methods, that in some way change the training data in order to allay the effects of the class imbalance problem \cite{japkowicz}.
+
+%P4: Wrap up the research question and context
+With this in mind, there are two crucial research questions this paper seeks to answer. First: how can automatic ML methods be improved in the domain of text classification for hate speech detection? Second: how can the class imbalance problem be dealt with for text data? These are the questions we seek to provide answers to, with the hope that they may inform future research and hate speech detection systems.
+
+\section{Previous work}
+%P1: mention some papers on antisemitism detection
+
+%P2: mention big paper that you use
+
+%P3: introduce previous work on class imbalance problem
+
+%P4: talk about generative models used in vision, tabular data
+
+%P5: focus on resampling methods
+
+%P6: talk about LLMs and their applications, find whether there is research done with LLMs on class imbalance
+
+\section{Methodology}
+%P1: talk about the different tasks
+
+%P2: talk about the different types of models trained
+
+%P3: talk about the resampling methods used
+
+%P4: talk about the augmented dataset specifically and testing
+
+%P5: talk about evaluation (mean recall) and methods used (cochran, etc)
+
+\section{Results}
+%P1: introduce, discuss difference in results in binary and 4-class tasks
+
+%P2: make diluted 4-class table, show Dunn test array (also for binary?)
+
+%P3: directly compare aug to randomundersampling
+
+%P4: talk about how many dimensions saw improvements with aug
+
+%P5: summarize?
+
+\section{Discussion}
+%P1: talk about difference between binary and 4-class tasks
+
+%P2: suggest reasons for this (authenticity of text samples)
+
+%P3: suggest further lines of inquiry (testing of this on images, tabular, testing more texts)
+
+\section{Conclusions}
+%P1: talk about implications for antisemitism classification
+
+%P2: talk about implications for the class imbalance problem
+
+%P3: talk about implications for text data
+
+\begin{thebibliography}{6}
+\bibitem{banks}
+Banks, J.: Regulating hate speech online. International Review of Law, Computers and Technology \textbf{24}(3), 233--239 (2010)
+
+\bibitem{chandra}
+Chandra, M., Pailla, D., Bhatia, H., Sanchawala, A., Gupta, M., Shrivastava, M., Kumaraguru, P.: ``Subverting the Jewtocracy'': Online Antisemitism Detection Using Multimodal Deep Learning.  ACM WEB SCIENCE CONFERENCE 2021, pp. 148-157. 
+
+\bibitem{green}
+Green, P., MacManus, T., De la Cour Venning, A.: Countdown to Annihilation: Genocide in Myanmar. International State of Crime Initiative, London (2015)
+
+\bibitem{japkowicz}
+Japkowicz, N., Shaju, S.: The class imbalance problem: A systematic study. Intelligent Data Analysis \textbf{6}(5), 429--449 (2002)
+
+\bibitem{pereira}
+Pereira-Kohatsu, J. C., Quijano-Sánchez, L., Liberatore, F., Camacho-Collados, M.: Detecting and Monitoring Hate Speech in Twitter. Sensors \textbf{19}(21), 4654--4691 (2019)
+
+\bibitem{siegel}
+Siegel, A.: Online Hate Speech. Social media and democracy: The state of the field, prospects for reform, 56--88 (2020).
+
+\bibitem{sun}
+Sun, Y., Wong, A., Kamel, M.: Classification of Imbalanced Data: A Review. International Journal of Pattern Recognition and Artificial Intelligence \textbf{23}(4), 687--719 (2009)
+
+\bibitem{ullmann}
+Ullmann, S., Tomalin, M.: Quarantining online hate speech: technical and ethical perspectives. Ethics and Information Technology \textbf{22}, 69--80 (2020)
+
+
+\end{thebibliography}
+\end{document}
