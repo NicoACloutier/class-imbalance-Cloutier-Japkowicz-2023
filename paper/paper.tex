@@ -67,7 +67,7 @@ One such group of techniques is resampling, altering the training data by adding
 One method for oversampling is the use of generative models, including generative adversarial networks (GANs) and autoencoders to generate synthetic data. These methods seek to match the distribution of the original dataset and create synthetic samples in accordance with that distribution \cite{hao}, with the goal of creating authentic synthetic examples for model training. They have achieved success in their applications, but primarily in computer vision and tabular data \cite{hao} \cite{engelmann} \cite{bellinger} \cite{dai}. Applications of these generative models to natural language processing (NLP) do occur \cite{phung}, but they are generally less common than applications to other areas. NLP tends to use more traditional statistical methods for oversampling such as SMOTE and random oversampling \cite{wijaya} \cite{glazkova}.
 
 %P5: talk about LLMs and their applications, find whether there is research done with LLMs on class imbalance
-While these advances in resampling have been occurring, similar advances have been made in generative LLMs, such as the GPT series of models from OpenAI, which have the ability to generate human-like text \cite{floridi} and have been applied to fields such as patent claim generation \cite{hsiang} and healthcare education \cite{sallam}. These LLMs have been investigated as a method for oversampling text data to account for the class imbalance problem, with relatively consistent success \cite{edwards} \cite{usuga} \cite{shaikh}, but their use is not widespread and they have not to our knowledge been applied to hate speech detection.
+While these advances in resampling have been occurring, similar advances have been made in generative LLMs, such as the GPT series of models from OpenAI, which have the ability to generate human-like text \cite{floridi} and have been applied to fields such as patent claim generation \cite{hsiang} and healthcare education \cite{sallam}. These LLMs have been investigated as a method for oversampling text data to account for the class imbalance problem, with relatively consistent success over not using resampling \cite{edwards} \cite{usuga} \cite{shaikh}. That being said, these studies do not compare the method with other, simpler or more traditional resampling methods. Drummond \& Holt \cite{drummond} argue that complex methods of resampling are difficult to justify without marked improvements in performance over simpler methods. This provides motivation, now that the method has shown success in accounting for the class imbalance, for investigating how it compares to existing methods of resampling and under which circumstances it improves relative to those methods.
 
 \section{Methodology}
 %P1: talk about the different tasks
@@ -105,10 +105,10 @@ Overall, the models trained on the LLM-augmented data showed no improvement on t
 \hline
 Resampling Method & Best score (\% over none) & Mean score (\% over none) \\\hline
 None & 0.667 (0\%) & 0.613 (0\%) \\\hline
-Random Undersampling & 0.688 (3.1\%) & {\bf 0.638 (4.1\%)} \\\hline
-SMOTE-Tomek & 0.667 (0\%) & 0.614 (0.2\%) \\\hline
+Random Undersampling & 0.689 (3.3\%) & {\bf 0.638 (4.1\%)} \\\hline
+SMOTE-Tomek & 0.668 (0.1\%) & 0.614 (0.2\%) \\\hline
 Random Oversampling & {\bf 0.690 (3.4\%)} & 0.623 (1.6\%) \\\hline
-AdaSyn & 0.661 (-0.9\%) & 0.608 (-0.8\%) \\\hline
+AdaSyn & 0.661 (-0.9\%) & 0.608 (0.8\%) \\\hline
 LLM-Augmented & 0.679 (1.8\%) & 0.617 (0.7\%) \\\hline
 \end{tabular}
 
@@ -142,8 +142,8 @@ The results of the 5-class classification task are shown below. The data used to
 Resampling Method & Best score (\% above none) & Mean score (\% above none) \\\hline
 None & 0.312 (0\%) & 0.265 (0\%) \\\hline
 Random Undersampling & 0.321 (2.9\%) & 0.265 (0\%) \\\hline
-SMOTE-Tomek & 0.314 (0.6\%) & 0.271 (2.3\%) \\\hline
-Random Oversampling & 0.369 (18.2\%) & 0.298 (12.4\%) \\\hline
+SMOTE-Tomek & 0.289 (-7.4\%) & 0.271 (2.3\%) \\\hline
+Random Oversampling & 0.369 (18.3\%) & 0.298 (12.5\%) \\\hline
 AdaSyn & 0.316 (1.3\%) & 0.251 (-5.3\%) \\\hline
 LLM-Augmented & {\bf 0.402 (28.8\%)} & {\bf 0.347 (30.9\%)} \\\hline
 \end{tabular}
@@ -160,8 +160,8 @@ None & {\bf 0.524 (0\%)} & {\bf 0.325 (0\%)} \\\hline
 Random Undersampling & 0.274 (-47.7\%) & 0.249 (-23.4\%) \\\hline
 SMOTE-Tomek & 0.295 (-43.7\%) & 0.264 (-18.8\%) \\\hline
 Random Oversampling & 0.319 (-39.1\%) & 0.271 (-16.6\%) \\\hline
-AdaSyn & 0.436 (-16.8\%) & 0.286 (-12\%) \\\hline
-LLM-Augmented & 0.302 (-42.4\%) &  0.270 (-16.9\%) \\\hline
+AdaSyn & 0.436 (-16.8\%) & 0.286 (-12.0\%) \\\hline
+LLM-Augmented & 0.302 (-42.4\%) & 0.270 (-16.9\%) \\\hline
 \end{tabular}
 
 \includegraphics[scale=0.6]{5type-precision.pdf}\\
@@ -176,12 +176,12 @@ The results of the 4-class classification task are shown below. The data used to
 \begin{tabular}{|l|l|l|}
 \hline
 Resampling Method & Best score (\% above none) & Mean score (\% above none) \\\hline
-None &  0.382 (0\%) & 0.328 (0\%) \\\hline
-Random Undersampling & 0.414 (8.4\%) & 0.339 (3.4\%) \\\hline
-SMOTE-Tomek & 0.421 (10.2\%) & 0.366 (11.6\%) \\\hline
-Random Oversampling & 0.400 (4.7\%) & 0.358 (9.1\%) \\\hline
-AdaSyn & 0.471 (23.3\%) & 0.322 (-1.8\%) \\\hline
-LLM-Augmented &  {\bf 0.538 (40.8\%)} & {\bf 0.433 (32.0\%)} \\\hline
+None & 0.337 (0\%) & 0.328 (0\%) \\\hline
+Random Undersampling & 0.414 (22.8\%) & 0.339 (3.4\%) \\\hline
+SMOTE-Tomek & 0.420 (24.6\%) & 0.366 (11.6\%) \\\hline
+Random Oversampling & 0.400 (18.7\%) & 0.358 (9.1\%) \\\hline
+AdaSyn & 0.471 (39.8\%) & 0.322 (-1.8\%) \\\hline
+LLM-Augmented & {\bf 0.509 (51.0\%)} & {\bf 0.433 (32.0\%)} \\\hline
 \end{tabular}
 
 \includegraphics[scale=0.6]{4type-recall.pdf}\\
@@ -193,7 +193,7 @@ LLM-Augmented &  {\bf 0.538 (40.8\%)} & {\bf 0.433 (32.0\%)} \\\hline
 \hline
 Resampling Method & Best score (\% above none) & Mean score (\% above none) \\\hline
 None & 0.452 (0\%) & 0.372 (0\%) \\\hline
-Random Undersampling & 0.361 (-20.1\%) & 0.323 (-13.2\%) \\\hline
+Random Undersampling & 0.361 (-17.9\%) & 0.323 (-13.2\%) \\\hline
 SMOTE-Tomek & 0.381 (-15.7\%) & 0.347 (-6.7\%) \\\hline
 Random Oversampling & 0.374 (-17.3\%) & 0.351 (-5.6\%) \\\hline
 AdaSyn & 0.378 (-16.4\%) & 0.344 (-7.5\%) \\\hline
@@ -212,8 +212,8 @@ One initial possible explanation for the high performance of the models with LLM
 \begin{tabular}{|l|l|l|l|l|}
 \hline
 Resampling Method & Political & Economic & Religious & Racial \\\hline
-None & {\bf 0.618} & 0.106 & 0.203 & 0.283  \\\hline
-Random Undersampling & 0.379 & {\bf 0.240} & 0.434 &  0.200 \\\hline
+None & {\bf 0.618} & 0.106 & 0.203 & 0.283 \\\hline
+Random Undersampling & 0.379 & {\bf 0.240} & 0.434 & 0.200  \\\hline
 SMOTE-Tomek & 0.506 & 0.135 & 0.465 & 0.245 \\\hline
 Random Oversampling & 0.487 & 0.163 & 0.442 & 0.230 \\\hline
 AdaSyn & 0.574 & 0.135 & 0.223 & 0.258 \\\hline
@@ -225,12 +225,12 @@ LLM-Augmented & 0.492 & 0.231 & {\bf 0.471} & {\bf 0.405} \\\hline
 \begin{tabular}{|l|l|l|l|l|}
 \hline
 Resampling Method & Political & Economic & Religious & Racial \\\hline
-None & 0.575 & 0.020 & 0.245 & 0.367 \\\hline
-Random Undersampling & 0.601 & 0.023 & 0.205 & 0.362 \\\hline
-SMOTE-Tomek & 0.653 & 0.018 & 0.233 & 0.378 \\\hline
-Random Oversampling & {\bf 0.661} & 0.015 & 0.227 & 0.392  \\\hline
-AdaSyn & 0.588 & 0.003 & 0.243 & 0.376 \\\hline
-LLM-Augmented & 0.570 & {\bf 0.111} & {\bf 0.360} & {\bf 0.424} \\\hline
+None & 0.598 & 0.029 & 0.254 & 0.390 \\\hline
+Random Undersampling & 0.601 & 0.024 & 0.205 & 0.362 \\\hline
+SMOTE-Tomek & 0.653 & 0.018 & 0.234 & 0.378 \\\hline
+Random Oversampling & {\bf 0.661} & 0.015 & 0.227 & 0.392 \\\hline
+AdaSyn & 0.602 & 0.017 & 0.243 & 0.390 \\\hline
+LLM-Augmented & 0.577 &{\bf  0.111} & {\bf 0.367} & {\bf 0.431} \\\hline
 \end{tabular}
 \end{nscenter}
 In precision and recall, the model is outperformed in political antisemitism (the largest class), and in recall it is slightly outperformed by random undersampling in economic antisemitism, but it outperforms the other models in religious and racial antisemitism on recall and in all classes other than political in precision.
