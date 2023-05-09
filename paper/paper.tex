@@ -45,13 +45,13 @@ Online hate speech has become increasingly prevalent with the rise of social med
 In recent years, hate speech has become increasingly mainstream and common within social media sites \cite{siegel}. This rise has not only caused online spaces to become less hospitable, but has also had several offline effects. On top of having severe psychological effects on the recipient \cite{siegel}, online hate speech also played a role in disseminating extremist anti-Rohingya voices leading to violence in Myanmar \cite{green}, and has provided motivation for several perpetrators of offline violent hate crimes \cite{siegel}. These events have motivated responses from numerous parties, including the social media sites themselves, that are increasingly looking to stop the spread of these messages \cite{ullmann}, and governmental bodies, that are seeking to regulate or prevent the spread of hate speech \cite{banks}. At the same time as hate speech has been becoming more common, social media sites have been generating more and more content, with popular social media site Twitter generating an average of 500 million tweets per day in 2019 \cite{pereira}.
 
 %P2: Introduce the need for automated methods of hate speech detection
-With these developments and the large amount of content on social media sites, these sites have been increasingly looking to automatic detection methods for hate speech \cite{ullmann}. These methods use Machine Learning (ML) to automatically detect and classify hateful speech, removing some of the work done by moderators, whose primary job is to respond reactively to user reports of hate speech \cite{ullmann}. Chandra et al. \cite{chandra} used a combination of image and text processing and classification algorithms to classify images and text on social media sites Twitter and Gab as antisemitic or not \cite{chandra}. We use the text component of their dataset to further analyze the presence of hate speech on Twitter and investigate new algorithms for classification.
+With these developments and the large amount of content on social media sites, these sites have been increasingly looking to automatic detection methods for hate speech \cite{ullmann}. These methods use Machine Learning (ML) to automatically detect and classify hateful speech, removing some of the work done by moderators, whose primary job is to respond reactively to user reports of hate speech \cite{ullmann}. Chandra et al. \cite{chandra} used a combination of image and text processing and classification algorithms to classify images and text on social media sites Twitter and Gab as antisemitic or not \cite{chandra}. In this paper, we seek a lower cost method that uses only the text component of their dataset to further analyze the presence of hate speech on Twitter and investigate new algorithms for classification.
 
 %P3: Introduce the imbalanced data issue
 One difficulty with this dataset is that it is imbalanced, meaning one classification is far more common in the dataset than another. Imbalanced data can negatively impact the performance of ML classification algorithms \cite{sun}, affecting numerous domains that use ML classification. Many ML algorithms are inadequately prepared to handle the class imbalance problem \cite{sun}, leading many to look to other solutions, including resampling methods, that in some way change the training data by adding or removing samples in order to allay the effects of the class imbalance problem \cite{japkowicz}.
 
 %P4: Wrap up the research question and context
-With this in mind, there are two crucial research questions this paper seeks to answer. First: how can automatic ML methods be improved in the domain of text classification for hate speech detection? Second: how can the class imbalance problem be dealt with for text data? These are the questions we seek to provide answers to, with the hope that they may inform future research and hate speech detection systems.
+With this in mind, there are two crucial research questions this paper seeks to answer. First: how can automatic ML methods be improved in the domain of text classification for hate speech detection? Second: can generative LLMs be used to allay the class problem in text data? These are the questions we seek to provide answers to, with the hope that they may inform future research and hate speech detection systems.
 
 \section{Previous work}
 %P1: mention big paper that you use
@@ -61,17 +61,17 @@ Antisemitism detection, as well as hate speech detection generally, has been the
 Imbalance is a common issue in ML classification problems. The class imbalance problem can severely negatively affect model predictive power, with the less common class (termed the ``minority class'') often being misclassified due to its low prevalence in the dataset relative to the larger class (the ``majority class'') \cite{abdelrahman}. This problem has affected fields as distinct as medicine, fraudulent call detection, and risk management \cite{sun}. Due to the severity with which this problem can limit model performance and its widespread nature, being seen in numerous distinct fields, it has become a focus of researchers as an area of improvement \cite{abdelrahman}, with numerous techniques being created to allay the effects of the problem.
 
 %P3: focus on resampling methods
-One such group of techniques is resampling, altering the training data by adding new samples or taking existing samples away in order to improve model performance. Generally, there are two types of resampling: oversampling, which describes the process of adding synthetic samples to a dataset, and undersampling, which describes the process of removing existing samples from a dataset \cite{shelke}. Resampling techniques can improve the performance of ML models when trained on imbalanced data \cite{lee} \cite{khushi}.
+One such group of techniques is resampling, altering the training data by adding new samples or taking existing samples away in order to improve model performance. Generally, there are two types of resampling: oversampling, which describes the process of adding samples to a dataset, and undersampling, which describes the process of removing existing samples from a dataset \cite{shelke}. Resampling techniques can improve the performance of ML models when trained on imbalanced data \cite{lee} \cite{khushi}.
 
 %P4: talk about generative models used in vision, tabular data
-One method for oversampling is the use of generative models, including generative adversarial networks (GANs) and autoencoders to generate synthetic data. These methods seek to match the distribution of the original dataset and create synthetic samples in accordance with that distribution \cite{hao}, with the goal of creating authentic synthetic examples for model training. They have achieved success in their applications, but primarily in computer vision and tabular data \cite{hao} \cite{engelmann} \cite{bellinger} \cite{dai}. Applications of these generative models to natural language processing (NLP) do occur \cite{phung}, but they are generally less common than applications to other areas. NLP tends to use more traditional statistical methods for oversampling such as SMOTE and random oversampling \cite{wijaya} \cite{glazkova}.
+One method for oversampling is the use of generative models, including generative adversarial networks (GANs) and autoencoders to generate synthetic data. These methods seek to match the distribution of the original dataset and create synthetic samples in accordance with that distribution \cite{hao}, with the goal of creating synthetic examples for model training that match the original distribution closely. They have achieved success in their applications, but primarily in computer vision and tabular data \cite{hao} \cite{engelmann} \cite{bellinger} \cite{dai}. Applications of these generative models to natural language processing (NLP) do occur \cite{phung}, but they are generally less common than applications to other areas. NLP tends to use more traditional statistical methods for oversampling such as SMOTE and random oversampling \cite{wijaya} \cite{glazkova}.
 
 %P5: talk about LLMs and their applications, find whether there is research done with LLMs on class imbalance
-While these advances in resampling have been occurring, similar advances have been made in generative LLMs, such as the GPT series of models from OpenAI, which have the ability to generate human-like text \cite{floridi} and have been applied to fields such as patent claim generation \cite{hsiang} and healthcare education \cite{sallam}. These LLMs have been investigated as a method for oversampling text data to account for the class imbalance problem, with relatively consistent success over not using resampling \cite{edwards} \cite{usuga} \cite{shaikh}. That being said, these studies do not compare the method with other, simpler or more traditional resampling methods. Drummond \& Holt \cite{drummond} argue that complex methods of resampling are difficult to justify without marked improvements in performance over simpler methods. This provides motivation, now that the method has shown success in accounting for the class imbalance, for investigating how it compares to existing methods of resampling and under which circumstances it improves relative to those methods.
+While these advances in resampling have been occurring, similar advances have been made in generative LLMs, such as the GPT series of models from OpenAI, which have the ability to generate human-like text \cite{floridi} and have been applied to fields such as patent claim generation \cite{hsiang} and healthcare education \cite{sallam}. These LLMs have been investigated as a method for oversampling text data to account for the class imbalance problem, with relatively consistent success over not using resampling \cite{edwards} \cite{usuga} \cite{shaikh}. That being said, these studies do not compare the method with other, simpler or more traditional resampling methods. Drummond \& Holte \cite{drummond} argue that complex methods of resampling are difficult to justify without marked improvements in performance over simpler methods. This provides motivation, now that the method has shown success in accounting for the class imbalance, for investigating how it compares to existing methods of resampling and under which circumstances it improves relative to those methods.
 
 \section{Methodology}
 %P1: talk about the different tasks
-The purpose of our paper is to study the effects of various types of resampling on hate speech detection and classification tasks. Our models were trained on three different tasks. The first was a simple binary classification task, where the models would attempt to classify the text of a tweet as either antisemitic or not antisemitic. The second was the 4-class type classification, where the dataset would be limited to only antisemitic samples, that would then be grouped into four classes: political, economic, religious, and racial antisemitism. Finally, the models were trained on a 5-class type classification task, where the dataset included both antisemitic and non-antisemitic samples, and the model would attempt to classify the samples into one of the four groups of antisemitism or classify them as not antisemitic, creating five classes total. Every model was trained and tested separately for all three tasks.
+The purpose of our paper is to study the effects of various types of resampling on hate speech detection and classification tasks. Our models were trained on three different tasks. The first was a simple binary classification task, where the models attempted to classify the text of a tweet as either antisemitic or not antisemitic. The second was the 4-class type classification, where the dataset was limited to only antisemitic samples, that was then grouped into four classes: political, economic, religious, and racial antisemitism. Finally, the models were trained on a 5-class type classification task, where the dataset included both antisemitic and non-antisemitic samples, and the model attempted to classify the samples into one of the four groups of antisemitism or classify them as not antisemitic, creating five classes total. Every model was trained and tested separately for all three tasks.
 
 %P2: talk about the different types of models trained
 In order to best represent a variety of ML architectures, different algorithms and methods of text representation were used. For algorithms, we trained classifiers utilizing the Naïve Bayes, Extreme Gradient Boosting, Decision Tree, and Support Vector Machine algorithms. We also used three methods of representing text: term frequency-inverse document frequency (TF-IDF), raw frequency, and Bag of Words (BoW).\footnote{We initially included a BERT-based representation method, but the models trained with this method produced results no better than chance.} Each model was trained with each method of text representation, creating a total of twelve models that were trained for each task. In order to reduce the dimensionality of the dataset, representations for training and testing data were limited to words that had a frequency score of at least 0.5\%, meaning that the word had to have a frequency of at least 0.5\% of the original, full length of the text in order to be considered by the models.
@@ -87,29 +87,29 @@ The dataset is imbalanced. Figure 1 shows the distribution of different classes 
 \end{nscenter}
 
 %P3: talk about the resampling methods used
-Several methods of resampling were used to reduce the impact of the class imbalance. One set of models was trained with no resampling, with additional sets being trained using random undersampling, random oversampling, SMOTE with Tomek Links, AdaSyn, and a final set being trained on the augmented dataset generated using the LLM. GPT-2 was used to generate the samples because it is easily available and callable programmatically with the HuggingFace API, unlike more recently released GPT models. The augmented dataset was created by generating 20 samples from each sample in the original dataset, creating a dataset that was larger, but had the same percentages of class imbalance. These models then used random undersampling on this larger dataset to account for this.
+Several methods of resampling were used to reduce the impact of the class imbalance, which were chosen to represent a variety of resampling techniques and algorithms. One set of models was trained with no resampling, with additional sets being trained using random undersampling \cite{shelke}, random oversampling \cite{shelke}, SMOTE with Tomek Links\footnote{SMOTE with Tomek links was selected over only SMOTE in order to represent combined oversampling and undersampling methods, as there are two other methods already (AdaSyn and random oversampling) that are pure oversampling.} \cite{fernandez}, AdaSyn \cite{he}, and a final set being trained on the augmented dataset generated using the LLM. GPT-2 was used to generate the samples because it is easily available and callable programmatically with the HuggingFace API, unlike more recently released GPT models. The augmented dataset was created by generating 20 samples from each sample in the original dataset, creating a dataset that was larger, but had the same percentages of class imbalance. These models then used random undersampling on this larger dataset to account for this. This was done in order to avoid having to regenerate samples for each model, due to the large number of models being trained.
 
 %P4: talk about the augmented dataset specifically and testing
 In regards to testing, each model was tested using 10-fold cross-validation on the original dataset. It was ensured that no samples generated from oversampling methods were used during testing, and additionally that, when testing the augmented model, if a sample that was used to generate more samples appeared in the testing split, the samples generated with it would not appear in the training split. This ensures that the models were not unfairly advantaged, and that each was tested on a large amount of genuine, unseen data.
 
 %P5: talk about evaluation (mean recall) and methods used (cochran, etc)
-For model evaluation, the two main metrics used were the means of the recall and precision scores across each of the classes the model had to classify. This was used in lieu of accuracy in order to account for the class imbalance in the data. Once the models were evaluated, their answers to the testing samples were converted to a binary matrix with each column representing a model and each row representing a sample. We then used the Cochran's Q-test, an extension of McNemar's test appropriate for the case of comparing multiple algorithms on a single domain, to test for significant difference in the models, then the Dunn test for post-hoc analysis.\footnote{See \cite{boukouvalas}} When testing the resampling methods against each other, the data were turned into another matrix with each column representing a resampling method and each row representing a model trained with that method, with the value in the cell being the mean recall of that model. A Friedman's $\chi^2$ test was then performed with a post-hoc Nemenyi test to analyze the results.
+For model evaluation, the two main metrics used were the macro-averages of the recall and precision scores across each of the classes the model had to classify for each task. This was used in lieu of accuracy in order to account for the class imbalance in the data. Once the models were evaluated, their answers to the testing samples were converted to a binary matrix with each column representing a model and each row representing a sample. We then used the Cochran's Q-test, an extension of McNemar's test appropriate for the case of comparing multiple algorithms on a single domain, to test for significant difference in the models, then the Dunn test for post-hoc analysis.\footnote{See \cite{boukouvalas}} When testing the resampling methods against each other, the data were turned into another matrix with each column representing a resampling method and each row representing a model trained with that method, with the value in the cell being the mean recall or precision of that model. A Friedman's $\chi^2$ test was then performed with a post-hoc Nemenyi test to analyze the results.
 
 {\parskip=0pt
 \section{Results}
-Overall, the models trained on the LLM-augmented data showed no improvement on the binary task, but they did show improvement on the 5-class classification and especially the 4-class classification tasks. Tables 1 \& 2 contain information for the binary classification task with each resampling method, as well as the best-performing model performance and mean model performance for each resampling method, with ``performance'' meaning the mean recall or precision score the model achieved. The best model was the best performing model of all of the models trained with that particular resampling method, not taking into account the performance on other resampling methods. The data used to create Table 1 received a Friedman $\chi^2$ test statistic of 13.09 and \emph{p}-value of $2.2 \times 10^{-2}$, while Table 2 received a statistic of 19.43 and a \emph{p}-value of $1.6 \times 10^{-3}$. After each table, an array is provided with the results of the post-hoc Nemenyi test on the resampling methods, with \emph{p}-values displayed in the array. A higher \emph{p}-value and lighter color means a greater degree of similarity between two models' answers and performance, while a lower \emph{p}-value and darker color means a lower degree of similarity. In these arrays, ``RU'' stands for random undersampling, ``ST'' stands for SMOTE with Tomek links, ``RO'' stands for random oversampling, ``AD'' stands for AdaSyn, ``NO'' stands for no resampling method, and ``LA'' stands for LLM-augmented.}
+Overall, the models trained on the LLM-augmented data showed no improvement on the binary task, but they did show improvement on the 5-class classification and especially the 4-class classification tasks. Tables 1 \& 2 contain information for the binary classification task with each resampling method, as well as the best-performing model performance and mean model performance for each resampling method out of the twelve combinations of each algorithm (Naïve Bayes, SVM, Decision Tree, and Extreme Gradient Boosting) and representation method (BoW, TF-IDF, and frequency), with ``performance'' meaning the mean recall or precision score the model achieved. The best model was the best performing model of all of the models trained with that particular resampling method, not taking into account the performance on other resampling methods. The data used to create Table 1 received a Friedman $\chi^2$ test \emph{p}-value of $2.2 \times 10^{-2}$, while Table 2 received a \emph{p}-value of $1.6 \times 10^{-3}$, allowing a rejection of the null hypothesis with $\alpha=0.05$. After each table, an array is provided with the results of the post-hoc Nemenyi test on the resampling methods, with \emph{p}-values displayed in the array. A higher \emph{p}-value and lighter color means we cannot reject the null hypothesis, while a lower \emph{p}-value and darker color means we can. In these arrays, ``RU'' stands for random undersampling, ``ST'' stands for SMOTE with Tomek links, ``RO'' stands for random oversampling, ``AD'' stands for AdaSyn, ``NO'' stands for no resampling method, and ``LA'' stands for LLM-augmented.}
 \begin{nscenter}
 {\bf Table 1.} Binary task resampling method recall\\
 
 \begin{tabular}{|l|l|l|}
 \hline
 Resampling Method & Best score (\% over none) & Mean score (\% over none) \\\hline
-None & 0.667 (0\%) & 0.613 (0\%) \\\hline
-Random Undersampling & 0.689 (3.3\%) & {\bf 0.638 (4.1\%)} \\\hline
-SMOTE-Tomek & 0.668 (0.1\%) & 0.614 (0.2\%) \\\hline
-Random Oversampling & {\bf 0.690 (3.4\%)} & 0.623 (1.6\%) \\\hline
-AdaSyn & 0.661 (-0.9\%) & 0.608 (0.8\%) \\\hline
-LLM-Augmented & 0.679 (1.8\%) & 0.617 (0.7\%) \\\hline
+None (NO) & 0.667 (0\%) & 0.613 (0\%) \\\hline
+Random Undersampling (RU) & 0.689 (3.3\%) & {\bf 0.638 (4.1\%)} \\\hline
+SMOTE-Tomek (ST) & 0.668 (0.1\%) & 0.614 (0.2\%) \\\hline
+Random Oversampling (RO) & {\bf 0.690 (3.4\%)} & 0.623 (1.6\%) \\\hline
+AdaSyn (AD) & 0.661 (-0.9\%) & 0.608 (0.8\%) \\\hline
+LLM-Augmented (LA) & 0.679 (1.8\%) & 0.617 (0.7\%) \\\hline
 \end{tabular}
 
 \includegraphics[scale=0.6]{binary-recall.pdf}\\
@@ -120,12 +120,12 @@ LLM-Augmented & 0.679 (1.8\%) & 0.617 (0.7\%) \\\hline
 \begin{tabular}{|l|l|l|}
 \hline
 Resampling Method & Best score (\% over none) & Mean score (\% over none) \\\hline
-None & {\bf 0.734 (0\%)} & {\bf 0.644 (0\%)} \\\hline
-Random Undersampling & 0.666 (-9.3\%) & 0.621 (-3.6\%) \\\hline
-SMOTE-Tomek & 0.670 (-8.7\%) & 0.612 (-5.0\%) \\\hline
-Random Oversampling & 0.674 (-8.2\%) & 0.617 (-4.2\%) \\\hline
-AdaSyn & 0.646 (-12.0\%) & 0.600 (-6.8\%) \\\hline
-LLM-Augmented & 0.668 (-9.0\%) & 0.613 (-4.8\%) \\\hline
+None (NO) & {\bf 0.734 (0\%)} & {\bf 0.644 (0\%)} \\\hline
+Random Undersampling (RU) & 0.666 (-9.3\%) & 0.621 (-3.6\%) \\\hline
+SMOTE-Tomek (ST) & 0.670 (-8.7\%) & 0.612 (-5.0\%) \\\hline
+Random Oversampling (RO) & 0.674 (-8.2\%) & 0.617 (-4.2\%) \\\hline
+AdaSyn (AD) & 0.646 (-12.0\%) & 0.600 (-6.8\%) \\\hline
+LLM-Augmented (LA) & 0.668 (-9.0\%) & 0.613 (-4.8\%) \\\hline
 \end{tabular}
 
 \includegraphics[scale=0.6]{binary-precision.pdf}\\
@@ -133,19 +133,19 @@ LLM-Augmented & 0.668 (-9.0\%) & 0.613 (-4.8\%) \\\hline
 \end{nscenter}
 In the binary task, the LLM-augmented models show no performance improvement over the other models. Generally, the resampling methods tend to do better than the models with no resampling on recall, but have worse precision performance, with this pattern being sustained by the models trained on LLM-augmented data.
 
-The results of the 5-class classification task are shown below. The data used to create Table 3 received a Friedman $\chi^2$ test statistic of 33.24 and \emph{p}-value of $3.4 \times 10^{-6}$, while Table 4 received a statistic of 11.57 and a \emph{p}-value of $4.1 \times 10^{-2}$.
+The results of the 5-class classification task are shown below. The data used to create Table 3 received a Friedman $\chi^2$ test \emph{p}-value of $3.4 \times 10^{-6}$, while Table 4 received a \emph{p}-value of $4.1 \times 10^{-2}$.
 \begin{nscenter}
 {\bf Table 3.} 5-class task resampling method recall\\
 
 \begin{tabular}{|l|l|l|}
 \hline
 Resampling Method & Best score (\% above none) & Mean score (\% above none) \\\hline
-None & 0.312 (0\%) & 0.265 (0\%) \\\hline
-Random Undersampling & 0.321 (2.9\%) & 0.265 (0\%) \\\hline
-SMOTE-Tomek & 0.289 (-7.4\%) & 0.271 (2.3\%) \\\hline
-Random Oversampling & 0.369 (18.3\%) & 0.298 (12.5\%) \\\hline
-AdaSyn & 0.316 (1.3\%) & 0.251 (-5.3\%) \\\hline
-LLM-Augmented & {\bf 0.402 (28.8\%)} & {\bf 0.347 (30.9\%)} \\\hline
+None (NO) & 0.312 (0\%) & 0.265 (0\%) \\\hline
+Random Undersampling (RU) & 0.321 (2.9\%) & 0.265 (0\%) \\\hline
+SMOTE-Tomek (ST) & 0.289 (-7.4\%) & 0.271 (2.3\%) \\\hline
+Random Oversampling (RO) & 0.369 (18.3\%) & 0.298 (12.5\%) \\\hline
+AdaSyn (AD) & 0.316 (1.3\%) & 0.251 (-5.3\%) \\\hline
+LLM-Augmented (LA) & {\bf 0.402 (28.8\%)} & {\bf 0.347 (30.9\%)} \\\hline
 \end{tabular}
 
 \includegraphics[scale=0.6]{5type-recall.pdf}\\
@@ -156,12 +156,12 @@ LLM-Augmented & {\bf 0.402 (28.8\%)} & {\bf 0.347 (30.9\%)} \\\hline
 \begin{tabular}{|l|l|l|}
 \hline
 Resampling Method & Best score (\% above none) & Mean score (\% above none) \\\hline
-None & {\bf 0.524 (0\%)} & {\bf 0.325 (0\%)} \\\hline
-Random Undersampling & 0.274 (-47.7\%) & 0.249 (-23.4\%) \\\hline
-SMOTE-Tomek & 0.295 (-43.7\%) & 0.264 (-18.8\%) \\\hline
-Random Oversampling & 0.319 (-39.1\%) & 0.271 (-16.6\%) \\\hline
-AdaSyn & 0.436 (-16.8\%) & 0.286 (-12.0\%) \\\hline
-LLM-Augmented & 0.302 (-42.4\%) & 0.270 (-16.9\%) \\\hline
+None (NO) & {\bf 0.524 (0\%)} & {\bf 0.325 (0\%)} \\\hline
+Random Undersampling (RU) & 0.274 (-47.7\%) & 0.249 (-23.4\%) \\\hline
+SMOTE-Tomek (ST) & 0.295 (-43.7\%) & 0.264 (-18.8\%) \\\hline
+Random Oversampling (RO) & 0.319 (-39.1\%) & 0.271 (-16.6\%) \\\hline
+AdaSyn (AD) & 0.436 (-16.8\%) & 0.286 (-12.0\%) \\\hline
+LLM-Augmented (LA) & 0.302 (-42.4\%) & 0.270 (-16.9\%) \\\hline
 \end{tabular}
 
 \includegraphics[scale=0.6]{5type-precision.pdf}\\
@@ -169,19 +169,19 @@ LLM-Augmented & 0.302 (-42.4\%) & 0.270 (-16.9\%) \\\hline
 \end{nscenter}
 The results on the 5-type task begin to show the benefits of LLM augmentation. The pattern of no resampling outperforming resampling on precision while the inverse happens on recall remains, but now LLM augmentation improves over no resampling by a far wider margin than any other resampling method, while retaining similar levels of drops in precision to other methods. Now, its gain in mean recall is larger than its loss in mean precision, which is not the case for any other resampling method in the 5-class task, and is only true for random undersampling in the binary task.
 
-The results of the 4-class classification task are shown below. The data used to create Table 5 received a Friedman $\chi^2$ test statistic of 21.95 and \emph{p}-value of $5.3 \times 10^{-4}$, while Table 6 received a statistic of 27.7 and a \emph{p}-value of $4.2 \times 10^{-5}$.
+The results of the 4-class classification task are shown below. The data used to create Table 5 received a Friedman $\chi^2$ test \emph{p}-value of $5.3 \times 10^{-4}$, while Table 6 received a \emph{p}-value of $4.2 \times 10^{-5}$.
 \begin{nscenter}
 {\bf Table 5.} 4-class task resampling method recall\\
 
 \begin{tabular}{|l|l|l|}
 \hline
 Resampling Method & Best score (\% above none) & Mean score (\% above none) \\\hline
-None & 0.337 (0\%) & 0.328 (0\%) \\\hline
-Random Undersampling & 0.414 (22.8\%) & 0.339 (3.4\%) \\\hline
-SMOTE-Tomek & 0.420 (24.6\%) & 0.366 (11.6\%) \\\hline
-Random Oversampling & 0.400 (18.7\%) & 0.358 (9.1\%) \\\hline
-AdaSyn & 0.471 (39.8\%) & 0.322 (-1.8\%) \\\hline
-LLM-Augmented & {\bf 0.509 (51.0\%)} & {\bf 0.433 (32.0\%)} \\\hline
+None (NO) & 0.337 (0\%) & 0.328 (0\%) \\\hline
+Random Undersampling (RU) & 0.414 (22.8\%) & 0.339 (3.4\%) \\\hline
+SMOTE-Tomek (ST) & 0.420 (24.6\%) & 0.366 (11.6\%) \\\hline
+Random Oversampling (RO) & 0.400 (18.7\%) & 0.358 (9.1\%) \\\hline
+AdaSyn (AD) & 0.471 (39.8\%) & 0.322 (-1.8\%) \\\hline
+LLM-Augmented (LA) & {\bf 0.509 (51.0\%)} & {\bf 0.433 (32.0\%)} \\\hline
 \end{tabular}
 
 \includegraphics[scale=0.6]{4type-recall.pdf}\\
@@ -192,12 +192,12 @@ LLM-Augmented & {\bf 0.509 (51.0\%)} & {\bf 0.433 (32.0\%)} \\\hline
 \begin{tabular}{|l|l|l|}
 \hline
 Resampling Method & Best score (\% above none) & Mean score (\% above none) \\\hline
-None & 0.452 (0\%) & 0.372 (0\%) \\\hline
-Random Undersampling & 0.361 (-17.9\%) & 0.323 (-13.2\%) \\\hline
-SMOTE-Tomek & 0.381 (-15.7\%) & 0.347 (-6.7\%) \\\hline
-Random Oversampling & 0.374 (-17.3\%) & 0.351 (-5.6\%) \\\hline
-AdaSyn & 0.378 (-16.4\%) & 0.344 (-7.5\%) \\\hline
-LLM-Augmented & {\bf 0.504 (11.5\%)} & {\bf 0.409 (9.9\%)} \\\hline
+None (NO) & 0.452 (0\%) & 0.372 (0\%) \\\hline
+Random Undersampling (RU) & 0.361 (-17.9\%) & 0.323 (-13.2\%) \\\hline
+SMOTE-Tomek (ST) & 0.381 (-15.7\%) & 0.347 (-6.7\%) \\\hline
+Random Oversampling (RO) & 0.374 (-17.3\%) & 0.351 (-5.6\%) \\\hline
+AdaSyn (AD) & 0.378 (-16.4\%) & 0.344 (-7.5\%) \\\hline
+LLM-Augmented (LA) & {\bf 0.504 (11.5\%)} & {\bf 0.409 (9.9\%)} \\\hline
 \end{tabular}
 
 \includegraphics[scale=0.6]{4type-precision.pdf}\\
@@ -212,12 +212,12 @@ One initial possible explanation for the high performance of the models with LLM
 \begin{tabular}{|l|l|l|l|l|}
 \hline
 Resampling Method & Political & Economic & Religious & Racial \\\hline
-None & {\bf 0.618} & 0.106 & 0.203 & 0.283 \\\hline
-Random Undersampling & 0.379 & {\bf 0.240} & 0.434 & 0.200  \\\hline
-SMOTE-Tomek & 0.506 & 0.135 & 0.465 & 0.245 \\\hline
-Random Oversampling & 0.487 & 0.163 & 0.442 & 0.230 \\\hline
-AdaSyn & 0.574 & 0.135 & 0.223 & 0.258 \\\hline
-LLM-Augmented & 0.492 & 0.231 & {\bf 0.471} & {\bf 0.405} \\\hline
+None (NO) & {\bf 0.618} & 0.106 & 0.203 & 0.283 \\\hline
+Random Undersampling (RU) & 0.379 & {\bf 0.240} & 0.434 & 0.200  \\\hline
+SMOTE-Tomek (ST) & 0.506 & 0.135 & 0.465 & 0.245 \\\hline
+Random Oversampling (RO) & 0.487 & 0.163 & 0.442 & 0.230 \\\hline
+AdaSyn (AD) & 0.574 & 0.135 & 0.223 & 0.258 \\\hline
+LLM-Augmented (LA) & 0.492 & 0.231 & {\bf 0.471} & {\bf 0.405} \\\hline
 \end{tabular}
 
 {\bf Table 8.} 4-class task class-wise resampling method precision\\
@@ -225,12 +225,12 @@ LLM-Augmented & 0.492 & 0.231 & {\bf 0.471} & {\bf 0.405} \\\hline
 \begin{tabular}{|l|l|l|l|l|}
 \hline
 Resampling Method & Political & Economic & Religious & Racial \\\hline
-None & 0.598 & 0.029 & 0.254 & 0.390 \\\hline
-Random Undersampling & 0.601 & 0.024 & 0.205 & 0.362 \\\hline
-SMOTE-Tomek & 0.653 & 0.018 & 0.234 & 0.378 \\\hline
-Random Oversampling & {\bf 0.661} & 0.015 & 0.227 & 0.392 \\\hline
-AdaSyn & 0.602 & 0.017 & 0.243 & 0.390 \\\hline
-LLM-Augmented & 0.577 &{\bf  0.111} & {\bf 0.367} & {\bf 0.431} \\\hline
+None (NO) & 0.598 & 0.029 & 0.254 & 0.390 \\\hline
+Random Undersampling (RU) & 0.601 & 0.024 & 0.205 & 0.362 \\\hline
+SMOTE-Tomek (ST) & 0.653 & 0.018 & 0.234 & 0.378 \\\hline
+Random Oversampling (RO) & {\bf 0.661} & 0.015 & 0.227 & 0.392 \\\hline
+AdaSyn (AD) & 0.602 & 0.017 & 0.243 & 0.390 \\\hline
+LLM-Augmented (LA) & 0.577 &{\bf  0.111} & {\bf 0.367} & {\bf 0.431} \\\hline
 \end{tabular}
 \end{nscenter}
 In precision and recall, the model is outperformed in political antisemitism (the largest class), and in recall it is slightly outperformed by random undersampling in economic antisemitism, but it outperforms the other models in religious and racial antisemitism on recall and in all classes other than political in precision.
@@ -240,7 +240,7 @@ In precision and recall, the model is outperformed in political antisemitism (th
 The most striking result of these trials is the difference in relative performance among the different tasks. Given that a class imbalance exists in all tasks, it may be expected that the generative LLM oversampling would produce similar results for each of these imbalances, but this is not the case. Furthermore, the difference in performance of the generative LLM-trained models to the models trained on data from other resampling methods grows from the 5-class to the 4-class task, suggesting that there is something particular to the binary classification problem that the generative LLM is not as good at accounting for as other resampling methods.
 
 %P2: suggest reasons for this (authenticity of text samples)
-One possible reason for this is the relative performance of undersampling and oversampling methods in general. Generally, oversampling methods tend to, at best, perform as well as undersampling methods \cite{drummond}, explaining why the only pure undersampling method scored best on the binary classification task. That being said, in tasks where undersampling would leave a dataset very small, this pattern may reverse. In the case of the 4-class classification task, one of the classes has only 8 observations, meaning, during undersampling, all other classes would also be reduced to 8 samples, making a very small dataset, that is perhaps inadequate for classification, providing one possible explanation for why oversampling outperformed undersampling on the 4-class and 5-class problems. As for why the generative LLM specifically outperformed other oversampling methods, it may simply be that generating text and then converting it into a vectorized form produces more authentic results than generating new samples from those vectorized forms with methods such as AdaSyn and SMOTE. This would explain the augmented LLM's outperformance of other oversampling methods on the 4-class and 5-class tasks, but would leave unexplained why it was outperformed by random oversampling in the binary classification task.
+One possible explanation could be the size of the classes. In the case of the 4-class classification task, one of the classes has only 8 observations, meaning, during undersampling, all other classes would also be reduced to 8 samples, making a very small dataset, that is perhaps inadequate for classification, providing one possible explanation for why oversampling outperformed undersampling on the 4-class and 5-class problems. As for why the generative LLM specifically outperformed other oversampling methods, it may simply be that generating text and then converting it into a vectorized form produces more authentic results than generating new samples from those vectorized forms with methods such as AdaSyn and SMOTE. This would explain the augmented LLM's outperformance of other oversampling methods on the 4-class and 5-class tasks, but would leave unexplained why it was outperformed by random oversampling in the binary classification task.
 
 \section{Conclusions and Future Work}
 %P3: suggest further lines of inquiry (testing of this on images, tabular, testing more texts)
@@ -248,7 +248,7 @@ In order to reach a better understanding of the applications of generative LLM o
 
 This paper proposes the use of generative LLMs to oversample imbalanced text datasets in order to account for the imbalance. Training models with different resampling methods, we find that results are unequal among tasks. The models trained on generative LLM data showed no improvement over other models in the binary classification of social media posts into an antisemitic/not antisemitic dichotomy, but they showed great improvement on the classification of tweets into types of antisemitism. Further research on imbalanced datasets with different characteristics is required to understand why the difference in relative performance was so stark and what factors most contribute to the utility of this method to accounting for the imbalance problem.
 
-\begin{thebibliography}{27}
+\begin{thebibliography}{31}
 \bibitem{abdelrahman}
 Abd Elrahman, S. M., Abraham, A: A review of class imbalance problem. Journal of Network and Innovative Computing \textbf{1}, 332--340 (2013)
 
@@ -273,6 +273,9 @@ Edwards, A., Ushio, A., Camacho-Collados, J., De Ribaupierre, H., Preece, A.: Gu
 \bibitem{engelmann}
 Engelmann, J., Lessmann, S.: Conditional Wasserstein GAN-based oversampling of tabular data for imbalanced learning. Expert Systems with Applications \textbf{174}, (2021)
 
+\bibitem{fernandez}
+Fernández, A., García, S., Herrera, F., Chawla, N. V.: SMOTE for Learning from Imbalanced Data: Progress and Challenges, Marking the 15-year Anniversary. Journal of Artificial Intelligence Research \textbf{61}, 863--905 (2018)
+
 \bibitem{floridi}
 Floridi, L., Chiriatti, M.: GPT-3: Its nature, scope, limits, and consequences. Minds and Machines \textbf{30}, 681--694 (2020)
 
@@ -287,6 +290,9 @@ Green, P., MacManus, T., De la Cour Venning, A.: Countdown to Annihilation: Geno
 
 \bibitem{hao}
 Hao, J., Wang, C., Zhang, H., Yang, G.: Annealing genetic GAN for minority oversampling. \emph{arXiv preprint}, (2020)
+
+\bibitem{he}
+He, H., Bai, Y., Garcia, E. A., Li, S.: ADASYN: Adaptive Synthetic Approach for Imbalanced Learning. IEEE International Joint Conference on Neural Networks 2008, 1322--1328
 
 \bibitem{japkowicz}
 Japkowicz, N., Shaju, S.: The class imbalance problem: A systematic study. Intelligent Data Analysis \textbf{6}(5), 429--449 (2002)
@@ -331,7 +337,7 @@ Sun, Y., Wong, A., Kamel, M.: Classification of Imbalanced Data: A Review. Inter
 Ullmann, S., Tomalin, M.: Quarantining online hate speech: technical and ethical perspectives. Ethics and Information Technology \textbf{22}, 69--80 (2020)
 
 \bibitem{usuga}
-Usuga-Cadavid, J. P., Grabot, B., Lamouri, S., Fortin, A.: Artificial Data Generation with Language Models for Imbalanced Classification in Maintenance. Artificial data generation with language models for imbalanced classification in maintenance. International workshop on service orientation in holonic and multi-agent manufacturing 2021, 57--68
+Usuga-Cadavid, J. P., Grabot, B., Lamouri, S., Fortin, A.: Artificial Data Generation with Language Models for Imbalanced Classification in Maintenance. International Workshop on Service Orientation in Holonic and Multi-Agent Manufacturing 2021, 57--68
 
 \bibitem{wijaya}
 Wijaya, I. D., Putrada, A. G., Oktaria, D.: Overcoming Data Imbalance Problems in Sexual Harassment Classification with SMOTE. International Journal on Information and Communication Technology \textbf{8}(1), 20--29 (2022)
