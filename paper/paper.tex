@@ -98,6 +98,7 @@ For model evaluation, the three main metrics used were the macro-averages of the
 {\parskip=0pt
 \section{Results}
 Overall, the models trained on the LLM-augmented data showed no improvement on the binary task, but they did show improvement on the 5-class classification and especially the 4-class classification tasks. Tables 1 contains information for the binary classification task with each resampling method, as well as the mean model performance for each resampling method out of the twelve combinations of each algorithm (Naïve Bayes, SVM, Decision Tree, and Extreme Gradient Boosting) and representation method (BoW, TF-IDF, and frequency), with ``performance'' meaning the mean recall, precision, or $F_1$ score the model achieved. The data used to create the $F_1$ column of Table 1 received a Friedman $\chi^2$ test \emph{p}-value of $2.2 \times 10^{-2}$, allowing a rejection of $H_0$ that each method comes from the same distribution with $\alpha=0.05$. After each table, an array is provided with the results of the post-hoc Nemenyi test on the resampling methods for the $F_1$ score, with \emph{p}-values displayed in the array. A higher \emph{p}-value and lighter color means we cannot reject the null hypothesis, while a lower \emph{p}-value and darker color means we can. In these arrays, ``RU'' stands for random undersampling, ``ST'' stands for SMOTE with Tomek links, ``RO'' stands for random oversampling, ``AD'' stands for AdaSyn, ``NO'' stands for no resampling method, and ``LA'' stands for LLM-augmented.}
+\clearpage
 \begin{nscenter}
 {\bf Table 1.} Binary task resampling method performance\\
 
@@ -292,6 +293,8 @@ Wijaya, I. D., Putrada, A. G., Oktaria, D.: Overcoming Data Imbalance Problems i
 
 \appendix
 \section{Algorithm-specific data}
+In order to get a more precise understanding of what happens for each combination of text representation and classification algorithm, we report the $F_1$ results obtained in each of the 12 cases considered. Space limitation prevented us from reporting the precision and recall results, but they are available upon request. The results show that for all but one combination models resampled with LLM augmentation fared better than all the other models in the 4-class case. The results are mixed in the 5-class case with XGBoost, decision trees, and Naïve Bayes sometimes benefitting from LLM-Augmented resampling. Overall, the best method in the 4-class classification is XGBoost with TF-IDF and LLM resampling, while in the other two tasks it is SVM with BoW and no resampling.
+
 \subsection{Extreme Gradient Boosting}
 \begin{nscenter}
 {\bf Table 5.} XGBoost-Bag of Words $F_1$ scores\\
@@ -341,6 +344,7 @@ LLM-Augmented (LA) & 0.642 & {\bf 0.329} & {\bf 0.460} \\\hline
 
 \subsection{Support Vector Machine}
 
+\clearpage
 \begin{nscenter}
 {\bf Table 8.} SVM-Bag of Words $F_1$ scores\\
 
@@ -419,7 +423,7 @@ LLM-Augmented (LA) & 0.599 & {\bf 0.312} & {\bf 0.436} \\\hline
 \end{tabular}
 \end{nscenter}
 
-
+\clearpage
 \begin{nscenter}
 {\bf Table 13.} Decision Tree-Frequency $F_1$ scores\\
 
