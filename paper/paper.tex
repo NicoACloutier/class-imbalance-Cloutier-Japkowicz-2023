@@ -289,4 +289,198 @@ Usuga-Cadavid, J. P., Grabot, B., Lamouri, S., Fortin, A.: Artificial Data Gener
 Wijaya, I. D., Putrada, A. G., Oktaria, D.: Overcoming Data Imbalance Problems in Sexual Harassment Classification with SMOTE. International Journal on Information and Communication Technology \textbf{8}(1), 20--29 (2022)
 
 \end{thebibliography}
+
+\appendix
+\section{Algorithm-specific data}
+\subsection{Extreme Gradient Boosting}
+\begin{nscenter}
+{\bf Table 5.} XGBoost-Bag of Words $F_1$ scores\\
+
+\begin{tabular}{|l|l|l|l|}
+\hline
+Resampling Method & Binary & 5-class & 4-class \\\hline
+None (NO) & 0.656 & 0.294  & 0.338 \\\hline
+Random Undersampling (RU) & {\bf 0.666} & 0.238 & 0.333 \\\hline
+SMOTE-Tomek (ST) & 0.660 & 0.286 & 0.372 \\\hline
+Random Oversampling (RO) & 0.663 & {\bf 0.319} & 0.386 \\\hline
+AdaSyn (AD) & 0.629 & 0.251 & 0.342 \\\hline
+LLM-Augmented (LA) & 0.660 & 0.300 & {\bf 0.432} \\\hline
+\end{tabular}
+\end{nscenter}
+
+\begin{nscenter}
+{\bf Table 6.} XGBoost-TF-IDF $F_1$ scores\\
+
+\begin{tabular}{|l|l|l|l|}
+\hline
+Resampling Method & Binary & 5-class & 4-class \\\hline
+None (NO) & 0.630 & 0.293 & 0.320 \\\hline
+Random Undersampling (RU) & 0.629 & 0.296 & 0.306 \\\hline
+SMOTE-Tomek (ST) & 0.642 & 0.273 & 0.327 \\\hline
+Random Oversampling (RO) & 0.627 & 0.274 & 0.318 \\\hline
+AdaSyn (AD) & {\bf 0.644} & 0.254 & 0.307 \\\hline
+LLM-Augmented (LA) & 0.636 & {\bf 0.313} & {\bf 0.520} \\\hline
+\end{tabular}
+\end{nscenter}
+
+
+\begin{nscenter}
+{\bf Table 7.} XGBoost-Frequency $F_1$ scores\\
+
+\begin{tabular}{|l|l|l|l|}
+\hline
+Resampling Method & Binary & 5-class & 4-class \\\hline
+None (NO) & 0.635 & 0.272 & 0.342 \\\hline
+Random Undersampling (RU) & 0.630 & 0.269 & 0.309 \\\hline
+SMOTE-Tomek (ST) & {\bf 0.644} & 0.287 & 0.357 \\\hline
+Random Oversampling (RO) & 0.636 & 0.272 & 0.363 \\\hline
+AdaSyn (AD) & 0.630 & 0.255 & 0.309 \\\hline
+LLM-Augmented (LA) & 0.642 & {\bf 0.329} & {\bf 0.460} \\\hline
+\end{tabular}
+\end{nscenter}
+
+\subsection{Support Vector Machine}
+
+\begin{nscenter}
+{\bf Table 8.} SVM-Bag of Words $F_1$ scores\\
+
+\begin{tabular}{|l|l|l|l|}
+\hline
+Resampling Method & Binary & 5-class & 4-class \\\hline
+None (NO) & {\bf 0.699} & {\bf 0.363} & 0.362 \\\hline
+Random Undersampling (RU) & 0.674 & 0.249 & 0.356 \\\hline
+SMOTE-Tomek (ST) & 0.665 & 0.281 & 0.400 \\\hline
+Random Oversampling (RO) & 0.682 & 0.298 & 0.380 \\\hline
+AdaSyn (AD) & 0.646 & 0.302 & 0.338 \\\hline
+LLM-Augmented (LA) & 0.673 & 0.332 & {\bf 0.413} \\\hline
+\end{tabular}
+\end{nscenter}
+
+\begin{nscenter}
+{\bf Table 9.} SVM-TF-IDF $F_1$ scores\\
+
+\begin{tabular}{|l|l|l|l|}
+\hline
+Resampling Method & Binary & 5-class & 4-class \\\hline
+None (NO) & {\bf 0.679} & {\bf 0.340} & 0.332 \\\hline
+Random Undersampling (RU) & 0.649 & 0.254 & 0.379 \\\hline
+SMOTE-Tomek (ST) & 0.667 & 0.287 & 0.377 \\\hline
+Random Oversampling (RO) & 0.659 & 0.329 & 0.378 \\\hline
+AdaSyn (AD) & 0.648 & 0.310 & 0.314 \\\hline
+LLM-Augmented (LA) & 0.658 & 0.295 & {\bf 0.403} \\\hline
+\end{tabular}
+\end{nscenter}
+
+
+\begin{nscenter}
+{\bf Table 10.} SVM-Frequency $F_1$ scores\\
+
+\begin{tabular}{|l|l|l|l|}
+\hline
+Resampling Method & Binary & 5-class & 4-class \\\hline
+None (NO) & 0.663 & 0.307 & 0.395 \\\hline
+Random Undersampling (RU) & {\bf 0.668} & 0.236 & 0.327 \\\hline
+SMOTE-Tomek (ST) & 0.654 & 0.298 & 0.340 \\\hline
+Random Oversampling (RO) & 0.656 & {\bf 0.316} & 0.370 \\\hline
+AdaSyn (AD) & 0.653 & 0.289 & 0.298 \\\hline
+LLM-Augmented (LA) & 0.634 & 0.312 & {\bf 0.402} \\\hline
+\end{tabular}
+\end{nscenter}
+
+\subsection{Decision Tree}
+
+\begin{nscenter}
+{\bf Table 11.} Decision Tree-Bag of Words $F_1$ scores\\
+
+\begin{tabular}{|l|l|l|l|}
+\hline
+Resampling Method & Binary & 5-class & 4-class \\\hline
+None (NO) & 0.619 & 0.283 & 0.392 \\\hline
+Random Undersampling (RU) & {\bf 0.650} & 0.257 & 0.343 \\\hline
+SMOTE-Tomek (ST) & 0.638 & 0.267 & 0.384 \\\hline
+Random Oversampling (RO) & 0.635 & 0.292 & 0.384 \\\hline
+AdaSyn (AD) & 0.602 & 0.234 & 0.323 \\\hline
+LLM-Augmented (LA) & 0.577 & {\bf 0.313} & {\bf 0.453} \\\hline
+\end{tabular}
+\end{nscenter}
+
+\begin{nscenter}
+{\bf Table 12.} Decision Tree-TF-IDF $F_1$ scores\\
+
+\begin{tabular}{|l|l|l|l|}
+\hline
+Resampling Method & Binary & 5-class & 4-class \\\hline
+None (NO) & 0.603 & 0.250 & 0.316 \\\hline
+Random Undersampling (RU) & {\bf 0.613} & 0.274 & 0.353 \\\hline
+SMOTE-Tomek (ST) & 0.590 & 0.246 & 0.334 \\\hline
+Random Oversampling (RO) & 0.587 & 0.254 & 0.305 \\\hline
+AdaSyn (AD) & 0.598 & 0.240 & 0.336 \\\hline
+LLM-Augmented (LA) & 0.599 & {\bf 0.312} & {\bf 0.436} \\\hline
+\end{tabular}
+\end{nscenter}
+
+
+\begin{nscenter}
+{\bf Table 13.} Decision Tree-Frequency $F_1$ scores\\
+
+\begin{tabular}{|l|l|l|l|}
+\hline
+Resampling Method & Binary & 5-class & 4-class \\\hline
+None (NO) & 0.601 & 0.251 & 0.318 \\\hline
+Random Undersampling (RU) & {\bf 0.622} & 0.283 & 0.301 \\\hline
+SMOTE-Tomek (ST) & 0.589 & 0.243 & 0.328 \\\hline
+Random Oversampling (RO) & 0.596 & 0.256 & 0.337 \\\hline
+AdaSyn (AD) & 0.602 & 0.244 & 0.302 \\\hline
+LLM-Augmented (LA) & 0.581 & {\bf 0.325} & {\bf 0.478} \\\hline
+\end{tabular}
+\end{nscenter}
+
+\subsection{Naïve Bayes}
+
+\begin{nscenter}
+{\bf Table 14.} NB-Bag of Words $F_1$ scores\\
+
+\begin{tabular}{|l|l|l|l|}
+\hline
+Resampling Method & Binary & 5-class & 4-class \\\hline
+None (NO) & {\bf 0.625} & 0.287 & 0.352 \\\hline
+Random Undersampling (RU) & 0.594 & 0.212 & 0.312 \\\hline
+SMOTE-Tomek (ST) & 0.539 & 0.253 & 0.375 \\\hline
+Random Oversampling (RO) & 0.608 & 0.282 & 0.353 \\\hline
+AdaSyn (AD) & 0.538 & 0.287 & {\bf 0.418} \\\hline
+LLM-Augmented (LA) & 0.565 & {\bf 0.303} & 0.335 \\\hline
+\end{tabular}
+\end{nscenter}
+
+\begin{nscenter}
+{\bf Table 15.} NB-TF-IDF $F_1$ scores\\
+
+\begin{tabular}{|l|l|l|l|}
+\hline
+Resampling Method & Binary & 5-class & 4-class \\\hline
+None (NO) & 0.559 & 0.253 & 0.347 \\\hline
+Random Undersampling (RU) & 0.575 & 0.255 & 0.343 \\\hline
+SMOTE-Tomek (ST) & 0.535 & 0.254 & 0.341 \\\hline
+Random Oversampling (RO) & 0.540 & 0.255 & 0.343 \\\hline
+AdaSyn (AD) & 0.528 & 0.255 & 0.346 \\\hline
+LLM-Augmented (LA) & {\bf 0.578} & {\bf 0.267} & {\bf 0.356} \\\hline
+\end{tabular}
+\end{nscenter}
+
+
+\begin{nscenter}
+{\bf Table 16.} NB-Frequency $F_1$ scores\\
+
+\begin{tabular}{|l|l|l|l|}
+\hline
+Resampling Method & Binary & 5-class & 4-class \\\hline
+None (NO) & 0.558 & 0.243 & 0.336 \\\hline
+Random Undersampling (RU) & {\bf 0.584} & 0.250 & 0.297 \\\hline
+SMOTE-Tomek (ST) & 0.535 & 0.250 & 0.336 \\\hline
+Random Oversampling (RO) & 0.548 & {\bf 0.255} & 0.334 \\\hline
+AdaSyn (AD) & 0.528 & 0.249 & 0.336 \\\hline
+LLM-Augmented (LA) & 0.576 & 0.245 & {\bf 0.342} \\\hline
+\end{tabular}
+\end{nscenter}
+
 \end{document}
