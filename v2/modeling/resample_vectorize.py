@@ -5,6 +5,7 @@ import imblearn, transformers, sentence_transformers
 from contextlib import contextmanager
 
 DATA_DIR = '../data/cleaned'
+OUTPUT_DIR = 'D:/data'
 INPUT_COLUMN = 'text'
 OUTPUT_COLUMN = 'classification'
 TEMP = 5.0
@@ -72,7 +73,8 @@ def aug_resample_vectorize(df: pd.DataFrame, method: str) -> tuple[list[tuple[np
         for temp_tuple_list in tuple_list:
             all_inputs += temp_tuple_list[0]
             all_outputs += temp_tuple_list[1]
-        output_trains.append((all_inputs, all_outputs))
+        all_inputs = encode_text(all_inputs)
+        output_trains.append((all_inputs, np.array(all_outputs)))
     return output_trains, tests
 
 def vectorize_resample(df: pd.DataFrame, method: str) -> tuple[list[tuple[np.ndarray, np.ndarray]], list[tuple[np.ndarray, np.ndarray]]]:
@@ -87,7 +89,7 @@ def vectorize_resample(df: pd.DataFrame, method: str) -> tuple[list[tuple[np.nda
         all_inputs, all_outputs = tuple_list[0][0], tuple_list[0][1]
         for temp_tuple_list in tuple_list[1:]:
             all_inputs = np.vstack((all_inputs, temp_tuple_list[0]))
-            all_outputs = np.vstack((all_outputs, temp_tuple_list[1]))
+            all_outputs = np.concatenate((all_outputs, temp_tuple_list[1]))
         output_trains.append((all_inputs, all_outputs))
     return output_trains, tests
 
@@ -103,7 +105,7 @@ def resample_vectorize_file(filename: str) -> list[tuple[list[tuple[np.ndarray, 
         arrays = resampling_function(df, resampling_method)
         outputs.append(arrays)
         end = time.time()
-        print(f'Finished {resampling_method} method on {filename} dataset in {end-start:.2f} seconds.')
+        print(f'Finished {resampling_method} method on {filename} dataset in {end-start:.2f} seconds.', end='')
     return outputs
 
 def write_to_file(arrays: list[tuple[list[tuple[np.ndarray, np.ndarray]], list[tuple[np.ndarray, np.ndarray]]]], filename: str) -> None:
@@ -115,20 +117,21 @@ def write_to_file(arrays: list[tuple[list[tuple[np.ndarray, np.ndarray]], list[t
     for method_index, resampling_method_arrays in enumerate(arrays):
         trains, tests = resampling_method_arrays
         for model_index, (train_array, test_array) in enumerate(zip(trains, tests)):
-            with open(f'{DATA_DIR}/{method_strings[method_index]}/{LLMS[model_index]}/train-input-{filename}', 'wb') as f:
+            with open(f'{OUTPUT_DIR}/{method_strings[method_index]}/{LLMS[model_index]}/train-input-{filename[:-4]}', 'wb') as f:
                 pickle.dump(train_array[0], f)
-            with open(f'{DATA_DIR}/{method_strings[method_index]}/{LLMS[model_index]}/train-output-{filename}', 'wb') as f:
-                pickle.dump(train_array[0], f)
+            with open(f'{OUTPUT_DIR}/{method_strings[method_index]}/{LLMS[model_index]}/train-output-{filename[:-4]}', 'wb') as f:
+                pickle.dump(train_array[1], f)
 
-            with open(f'{DATA_DIR}/{method_strings[method_index]}/{LLMS[model_index]}/test-input-{filename}', 'wb') as f:
-                pickle.dump(train_array[0], f)
-            with open(f'{DATA_DIR}/{method_strings[method_index]}/{LLMS[model_index]}/test-input-{filename}', 'wb') as f:
-                pickle.dump(train_array[0], f)
+            with open(f'{OUTPUT_DIR}/{method_strings[method_index]}/{LLMS[model_index]}/test-input-{filename[:-4]}', 'wb') as f:
+                pickle.dump(test_array[0], f)
+            with open(f'{OUTPUT_DIR}/{method_strings[method_index]}/{LLMS[model_index]}/test-input-{filename[:-4]}', 'wb') as f:
+                pickle.dump(test_array[1], f)
 
 def main():
     files = [file for file in os.listdir(DATA_DIR) if file.endswith('.csv')]
     for file in files:
         write_to_file(resample_vectorize_file(f'{DATA_DIR}/{file}'), file)
+        print(' Written to file.')
 
 if __name__ == '__main__':
     main()
