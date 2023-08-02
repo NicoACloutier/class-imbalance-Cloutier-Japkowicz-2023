@@ -65,7 +65,7 @@ def aug_resample_vectorize(df: pd.DataFrame, method: str) -> tuple[list[tuple[np
     tests = trains.copy()
     output_trains = []
     jump = len(trains) // K
-    for inputs, outputs in trains:
+    for i, (inputs, outputs) in enumerate(trains):
         spliced_inputs = [inputs[i*jump:(i+1)*jump] for i in range(K)]
         spliced_outputs = [outputs[i*jump:(i+1)*jump] for i in range(K)]
         tuple_list = [aug_resample(inputs, outputs) for spliced_input, spliced_output in zip(spliced_inputs, spliced_outputs)]
@@ -73,7 +73,7 @@ def aug_resample_vectorize(df: pd.DataFrame, method: str) -> tuple[list[tuple[np
         for temp_tuple_list in tuple_list:
             all_inputs += temp_tuple_list[0]
             all_outputs += temp_tuple_list[1]
-        all_inputs = encode_text(all_inputs)
+        all_inputs = encode_text(LLMS[i], all_inputs)
         output_trains.append((all_inputs, np.array(all_outputs)))
     return output_trains, tests
 
@@ -105,7 +105,7 @@ def resample_vectorize_file(filename: str) -> list[tuple[list[tuple[np.ndarray, 
         arrays = resampling_function(df, resampling_method)
         outputs.append(arrays)
         end = time.time()
-        print(f'Finished {resampling_method} method on {filename} dataset in {end-start:.2f} seconds.', end='')
+        print(f'Finished {resampling_method} method on {filename} dataset in {end-start:.2f} seconds.', end=' ')
     return outputs
 
 def write_to_file(arrays: list[tuple[list[tuple[np.ndarray, np.ndarray]], list[tuple[np.ndarray, np.ndarray]]]], filename: str) -> None:
@@ -124,14 +124,14 @@ def write_to_file(arrays: list[tuple[list[tuple[np.ndarray, np.ndarray]], list[t
 
             with open(f'{OUTPUT_DIR}/{method_strings[method_index]}/{LLMS[model_index]}/test-input-{filename[:-4]}', 'wb') as f:
                 pickle.dump(test_array[0], f)
-            with open(f'{OUTPUT_DIR}/{method_strings[method_index]}/{LLMS[model_index]}/test-input-{filename[:-4]}', 'wb') as f:
+            with open(f'{OUTPUT_DIR}/{method_strings[method_index]}/{LLMS[model_index]}/test-output-{filename[:-4]}', 'wb') as f:
                 pickle.dump(test_array[1], f)
 
 def main():
     files = [file for file in os.listdir(DATA_DIR) if file.endswith('.csv')]
     for file in files:
         write_to_file(resample_vectorize_file(f'{DATA_DIR}/{file}'), file)
-        print(' Written to file.')
+        print('Written to file.\n')
 
 if __name__ == '__main__':
     main()
