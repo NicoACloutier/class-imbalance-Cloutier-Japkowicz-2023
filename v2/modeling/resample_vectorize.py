@@ -1,23 +1,24 @@
 import pandas as pd
 import numpy as np
 import sys, os, pickle, collections, random, functools, time
-import imblearn, transformers, sentence_transformers
+import imblearn, sentence_transformers
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from contextlib import contextmanager
 
 DATA_DIR = '../data/cleaned'
 OUTPUT_DIR = 'D:/data'
 INPUT_COLUMN = 'text'
 OUTPUT_COLUMN = 'classification'
-TEMP = 5.0
 K = 10 #k for k-fold xvalidation
 METHODS = {'none': None,
            'smote': imblearn.over_sampling.SMOTE, 
            'over': imblearn.over_sampling.RandomOverSampler, 
            'under': imblearn.under_sampling.RandomUnderSampler, 
            'aug': None}
-GENERATIVE_LLM_STRING = 'gpt2'
-GENERATIVE_LLM_MODEL = transformers.GPT2LMHeadModel.from_pretrained(GENERATIVE_LLM_STRING)
-GENERATIVE_LLM_TOKENIZER = transformers.AutoTokenizer.from_pretrained(GENERATIVE_LLM_STRING)
+LIMIT = 2000 #upper limit to number of samples in each dataset. Used for testing.
+GENERATIVE_LLM_STRING = 'humarin/chatgpt_paraphraser_on_T5_base'
+GENERATIVE_LLM_MODEL = AutoModelForSeq2SeqLM.from_pretrained('humarin/chatgpt_paraphraser_on_T5_base')
+GENERATIVE_LLM_TOKENIZER = AutoTokenizer.from_pretrained('humarin/chatgpt_paraphraser_on_T5_base')
 LLMS = ['bert-base-uncased',]
 models = [sentence_transformers.SentenceTransformer(path) for path in LLMS]
 model_dict = {LLMS[i]: model for i, model in enumerate(models)}
@@ -35,8 +36,8 @@ def encode_text(name: str, text: list[str]) -> np.ndarray:
 def generate(text: str) -> str:
     '''Perform the generative LLM text generation.'''
     tokenized = GENERATIVE_LLM_TOKENIZER.encode(text, max_length=15, truncation=True, return_tensors='pt')
-    generation = GENERATIVE_LLM_MODEL.generate(tokenized, max_length=25, do_sample=True, min_new_tokens=5, length_penalty=1, 
-                                    temperature=random.random()*8, top_k=5, pad_token_id=GENERATIVE_LLM_TOKENIZER.eos_token_id)
+    generation = GENERATIVE_LLM_MODEL.generate(tokenized, max_length=25, do_sample=True, length_penalty=1, 
+                                    temperature=random.random()*3, top_k=5, pad_token_id=GENERATIVE_LLM_TOKENIZER.eos_token_id)
     text = GENERATIVE_LLM_TOKENIZER.decode(generation[0], skip_special_tokens=True)
     text = text.replace('\n', ' ')
     return text
@@ -68,7 +69,7 @@ def aug_resample_vectorize(df: pd.DataFrame, method: str) -> tuple[list[tuple[np
     for i, (inputs, outputs) in enumerate(trains):
         spliced_inputs = [inputs[i*jump:(i+1)*jump] for i in range(K)]
         spliced_outputs = [outputs[i*jump:(i+1)*jump] for i in range(K)]
-        tuple_list = [aug_resample(inputs, outputs) for spliced_input, spliced_output in zip(spliced_inputs, spliced_outputs)]
+        tuple_list = [aug_resample(spliced_input, spliced_output) for spliced_input, spliced_output in zip(spliced_inputs, spliced_outputs)]
         all_inputs, all_outputs = [], []
         for temp_tuple_list in tuple_list:
             all_inputs += temp_tuple_list[0]
@@ -85,7 +86,7 @@ def vectorize_resample(df: pd.DataFrame, method: str) -> tuple[list[tuple[np.nda
     for inputs, outputs in trains:
         spliced_inputs = [inputs[i*jump:(i+1)*jump] for i in range(K)]
         spliced_outputs = [outputs[i*jump:(i+1)*jump] for i in range(K)]
-        tuple_list = [METHODS[method]().fit_resample(inputs, outputs) for spliced_input, spliced_output in zip(spliced_inputs, spliced_outputs)]
+        tuple_list = [METHODS[method]().fit_resample(spliced_input, spliced_output) for spliced_input, spliced_output in zip(spliced_inputs, spliced_outputs)]
         all_inputs, all_outputs = tuple_list[0][0], tuple_list[0][1]
         for temp_tuple_list in tuple_list[1:]:
             all_inputs = np.vstack((all_inputs, temp_tuple_list[0]))
@@ -98,7 +99,9 @@ def resample_vectorize_file(filename: str) -> list[tuple[list[tuple[np.ndarray, 
     functions = {'aug': aug_resample_vectorize, 'none': just_vectorize}
     df = pd.read_csv(filename)
     df[INPUT_COLUMN] = df[INPUT_COLUMN].astype(str)
+    df = df.iloc[:LIMIT]
     outputs = []
+    print()
     for resampling_method in METHODS:
         start = time.time()
         resampling_function = functions[resampling_method] if resampling_method in functions else vectorize_resample
