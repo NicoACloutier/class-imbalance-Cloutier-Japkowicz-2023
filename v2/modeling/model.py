@@ -7,7 +7,15 @@ K = 10
 MODEL = tree.DecisionTreeClassifier
 METHODS = ['none', 'smote', 'over', 'under', 'aug']
 MODELS = ['bert-base-uncased']
-DATASETS = ['antisemitism_two', 'antisemitism_four', 'antisemitism_five', 'clothing_rating', 'clothing_topic', 'cyberbullying', 'disaster', 'website']
+DATASETS = ['antisemitism_two', 
+            'antisemitism_four', 
+            'antisemitism_five',  
+            'disaster', 
+            'website', 
+            'clothing_rating', 
+            'clothing_topic', 
+            'cyberbullying',
+            ]
 
 def read_files(data_dir: str, method_name: str, model_name: str, dataset: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     '''Read the files associated with a particular model.'''
@@ -23,8 +31,8 @@ def read_files(data_dir: str, method_name: str, model_name: str, dataset: str) -
 def model_partition(train_inputs: np.ndarray, train_outputs: np.ndarray, test_inputs: np.ndarray, 
                     step: int, train_jump: int, test_jump: int, num_classes: int) -> np.ndarray:
     '''Fit and test a particular partition within a dataset.'''
-    train_inputs = train_inputs[step*train_jump:(step+1)*train_jump]
-    train_outputs = train_outputs[step*train_jump:(step+1)*train_jump]
+    train_inputs = np.vstack((train_inputs[:step*train_jump], train_inputs[(step+1)*train_jump:]))
+    train_outputs = np.concatenate((train_outputs[:step*train_jump], train_outputs[(step+1)*train_jump:]))
     test_inputs = test_inputs[step*test_jump:(step+1)*test_jump]
 
     #this is to deal with classes that are not present in a particular partition
