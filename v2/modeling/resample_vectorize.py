@@ -16,6 +16,7 @@ METHODS = {'none': None,
            'under': imblearn.under_sampling.RandomUnderSampler, 
            'aug': None}
 LIMIT = 2000 #upper limit to number of samples in each dataset. Used for testing.
+K_NEIGHBORS = 6 #number of neighbors for SMOTE
 GENERATIVE_LLM_STRING = 'humarin/chatgpt_paraphraser_on_T5_base'
 GENERATIVE_LLM_MODEL = AutoModelForSeq2SeqLM.from_pretrained('humarin/chatgpt_paraphraser_on_T5_base')
 GENERATIVE_LLM_TOKENIZER = AutoTokenizer.from_pretrained('humarin/chatgpt_paraphraser_on_T5_base')
@@ -65,7 +66,7 @@ def aug_resample_vectorize(df: pd.DataFrame, method: str) -> tuple[list[tuple[np
     trains = [(list(df[INPUT_COLUMN]), list(df[OUTPUT_COLUMN])) for _ in models]
     tests = trains.copy()
     output_trains = []
-    jump = len(trains) // K
+    jump = len(trains[0][0]) // K
     for i, (inputs, outputs) in enumerate(trains):
         spliced_inputs = [inputs[i*jump:(i+1)*jump] for i in range(K)]
         spliced_outputs = [outputs[i*jump:(i+1)*jump] for i in range(K)]
@@ -78,15 +79,32 @@ def aug_resample_vectorize(df: pd.DataFrame, method: str) -> tuple[list[tuple[np
         output_trains.append((all_inputs, np.array(all_outputs)))
     return output_trains, tests
 
+def smote_resample(inputs: np.ndarray, outputs: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    '''Resample with SMOTE.'''
+    resampler = METHODS['smote']()
+    try:
+        return resampler.fit_resample(inputs, outputs)
+    except ValueError: #if the number in a particular class is not enough, random resample until it has the proper number
+        value_counter = collections.Counter(outputs)
+        needs_more = {key: value_counter[key] for key in value_counter if value_counter[key] < K_NEIGHBORS}
+        for key in needs_more:
+            temp_input = [row for i, row in enumerate(inputs) if outputs[i] == key]
+            inputs = np.vstack((inputs, np.array([random.choice(temp_input) for _ in range(K_NEIGHBORS-needs_more[key])])))
+            outputs = np.concatenate((outputs, np.array([key for _ in range(K_NEIGHBORS-needs_more[key])])))
+
+    return resampler.fit_resample(inputs, outputs)
+
 def vectorize_resample(df: pd.DataFrame, method: str) -> tuple[list[tuple[np.ndarray, np.ndarray]], list[tuple[np.ndarray, np.ndarray]]]:
     '''Perform a vectorization then traditional resampling on a `DataFrame`.'''
     trains, tests = just_vectorize(df, method)
     output_trains = []
-    jump = len(trains) // K
+    jump = len(trains[0][0]) // K
     for inputs, outputs in trains:
         spliced_inputs = [inputs[i*jump:(i+1)*jump] for i in range(K)]
         spliced_outputs = [outputs[i*jump:(i+1)*jump] for i in range(K)]
-        tuple_list = [METHODS[method]().fit_resample(spliced_input, spliced_output) for spliced_input, spliced_output in zip(spliced_inputs, spliced_outputs)]
+        tuple_list = [smote_resample(spliced_input, spliced_output) if method == 'smote' else METHODS[method]().fit_resample(spliced_input, 
+                                                                            spliced_output) for (spliced_input, 
+                                                                            spliced_output) in zip(spliced_inputs, spliced_outputs)]
         all_inputs, all_outputs = tuple_list[0][0], tuple_list[0][1]
         for temp_tuple_list in tuple_list[1:]:
             all_inputs = np.vstack((all_inputs, temp_tuple_list[0]))
