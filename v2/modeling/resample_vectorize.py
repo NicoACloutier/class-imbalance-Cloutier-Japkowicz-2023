@@ -11,21 +11,22 @@ INPUT_COLUMN = 'text'
 OUTPUT_COLUMN = 'classification'
 K = 10 #k for k-fold xvalidation
 METHODS = {'none': None,
+           'aug_fine': None,
            'smote': imblearn.over_sampling.SMOTE, 
            'over': imblearn.over_sampling.RandomOverSampler, 
            'under': imblearn.under_sampling.RandomUnderSampler, 
-           'aug': None,
-           'aug_fine': None}
+           'aug': None,}
 LIMIT = 5000 #upper limit to number of samples in each dataset. Used for testing.
 K_NEIGHBORS = 6 #number of neighbors for SMOTE
 GENERATIVE_LLM_STRING = 'gpt2'
 LLM_INITIALIZER = GPT2LMHeadModel.from_pretrained
 GENERATIVE_LLM_MODEL = LLM_INITIALIZER('gpt2')
 GENERATIVE_LLM_TOKENIZER = GPT2Tokenizer.from_pretrained('gpt2')
-LLMS = ['xlm-roberta-base', 'bert-base-uncased', 'multi-qa-MiniLM-L6-cos-v1', 'bigscience/bloom', 'gpt2', 'MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli', 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2']
+LLMS = ['xlm-roberta-base', 'bert-base-uncased',]
 MODEL_DIR = f'D:/models/{GENERATIVE_LLM_STRING}'
 models = [sentence_transformers.SentenceTransformer(path) for path in LLMS]
 model_dict = {LLMS[i]: model for i, model in enumerate(models)}
+fine_models = dict() #dict used to save fine-tuned models
 
 @functools.cache
 def encode_sentence(name: str, sentence: str) -> np.ndarray:
@@ -46,11 +47,12 @@ def generate(text: str) -> str:
     text = text.replace('\n', ' ')
     return text
 
-def fine_generate(text: str, model: GPT2LMHeadModel) -> str:
+@functools.cache
+def fine_generate(text: str, id: str) -> str:
     '''Perform the generative LLM text generation with a fine-tuned model.'''
     tokenized = GENERATIVE_LLM_TOKENIZER.encode(text, max_length=15, truncation=True, return_tensors='pt')
-    generation = model.generate(tokenized, max_length=25, do_sample=True, length_penalty=1, 
-                                temperature=random.random()*3, top_k=5, pad_token_id=model.eos_token_id)
+    generation = fine_models[id].generate(tokenized, max_length=25, do_sample=True, length_penalty=1, 
+                                temperature=random.random()*3, top_k=5, pad_token_id=GENERATIVE_LLM_TOKENIZER.eos_token_id)
     text = GENERATIVE_LLM_TOKENIZER.decode(generation[0], skip_special_tokens=True)
     text = text.replace('\n', ' ')
     return text
@@ -67,7 +69,7 @@ def aug_resample(text: list[str], classifications: list[int]) -> tuple[list[str]
         output_classes += [key,] * counts[key]
     return output_text, output_classes
 
-def fine_resample(text: list[str], classifications: list[int], model: GPT2LMHeadModel) -> tuple[list[str], list[int]]:
+def fine_resample(text: list[str], classifications: list[int], id: str) -> tuple[list[str], list[int]]:
     '''Perform fine-tuned augmented LLM resampling given a list of inputs and outputs.'''
     output_text, output_classes = text.copy(), classifications.copy()
     counts = collections.Counter(classifications)
@@ -75,7 +77,7 @@ def fine_resample(text: list[str], classifications: list[int], model: GPT2LMHead
     counts = {key: -(counts[key]-maximum) for key in counts}
     for key in counts:
         temp_text = [item for i, item in enumerate(text) if classifications[i] == key]
-        output_text += [fine_generate(temp_text[random.randint(0, len(temp_text)-1)], model) for _ in range(counts[key])]
+        output_text += [fine_generate(temp_text[random.randint(0, len(temp_text)-1)], id) for _ in range(counts[key])]
         output_classes += [key,] * counts[key]
     return output_text, output_classes
 
@@ -109,9 +111,10 @@ def aug_fine_resample_vectorize(df: pd.DataFrame, method: str, name: str) -> tup
     jump = len(trains[0][0]) // K
     for i, (inputs, outputs) in enumerate(trains):
         model = LLM_INITIALIZER(f'{MODEL_DIR}/{name}/{name}-{i}')
+        fine_models[f'{name}-{i}'] = model
         spliced_inputs = [inputs[i*jump:(i+1)*jump] for i in range(K)]
         spliced_outputs = [outputs[i*jump:(i+1)*jump] for i in range(K)]
-        tuple_list = [fine_resample(spliced_input, spliced_output, model) for spliced_input, spliced_output in zip(spliced_inputs, spliced_outputs)]
+        tuple_list = [fine_resample(spliced_input, spliced_output, f'{name}-{i}') for spliced_input, spliced_output in zip(spliced_inputs, spliced_outputs)]
         all_inputs, all_outputs = [], []
         for temp_tuple_list in tuple_list:
             all_inputs += temp_tuple_list[0]
@@ -119,6 +122,7 @@ def aug_fine_resample_vectorize(df: pd.DataFrame, method: str, name: str) -> tup
         all_inputs = encode_text(LLMS[i], all_inputs)
         output_trains.append((all_inputs, np.array(all_outputs)))
         output_tests.append((encode_text(LLMS[i], tests[i][0]), tests[i][1]))
+        del fine_models[f'{name}-{i}']
     return output_trains, output_tests
 
 def aug_resample_vectorize(df: pd.DataFrame, method: str, name: str) -> tuple[list[tuple[np.ndarray, np.ndarray]], list[tuple[np.ndarray, np.ndarray]]]:
@@ -143,7 +147,7 @@ def aug_resample_vectorize(df: pd.DataFrame, method: str, name: str) -> tuple[li
 
 def vectorize_resample(df: pd.DataFrame, method: str, name: str) -> tuple[list[tuple[np.ndarray, np.ndarray]], list[tuple[np.ndarray, np.ndarray]]]:
     '''Perform a vectorization then traditional resampling on a `DataFrame`.'''
-    trains, tests = just_vectorize(df, method)
+    trains, tests = just_vectorize(df, method, name)
     output_trains = []
     jump = len(trains[0][0]) // K
     for inputs, outputs in trains:
@@ -159,7 +163,7 @@ def vectorize_resample(df: pd.DataFrame, method: str, name: str) -> tuple[list[t
         output_trains.append((all_inputs, all_outputs))
     return output_trains, tests
 
-def resample_vectorize_file(filename: str) -> list[tuple[list[tuple[np.ndarray, np.ndarray]], list[tuple[np.ndarray, np.ndarray]]]]:
+def resample_vectorize_file(filename: str, name: str) -> list[tuple[list[tuple[np.ndarray, np.ndarray]], list[tuple[np.ndarray, np.ndarray]]]]:
     '''Perform the entire resampling and vectorization process on a file with all resampling methods.'''
     functions = {'aug': aug_resample_vectorize, 'aug_fine': aug_fine_resample_vectorize, 'none': just_vectorize}
     df = pd.read_csv(filename)
@@ -170,7 +174,7 @@ def resample_vectorize_file(filename: str) -> list[tuple[list[tuple[np.ndarray, 
     for resampling_method in METHODS:
         start = time.time()
         resampling_function = functions[resampling_method] if resampling_method in functions else vectorize_resample
-        arrays = resampling_function(df, resampling_method, filename[:-4])
+        arrays = resampling_function(df, resampling_method, name[:-4])
         outputs.append(arrays)
         end = time.time()
         print(f'Finished {resampling_method} method on {filename} dataset in {end-start:.2f} seconds.', end=' ')
@@ -198,7 +202,7 @@ def write_to_file(arrays: list[tuple[list[tuple[np.ndarray, np.ndarray]], list[t
 def main():
     files = [file for file in os.listdir(DATA_DIR) if file.endswith('.csv')]
     for file in files:
-        write_to_file(resample_vectorize_file(f'{DATA_DIR}/{file}'), file)
+        write_to_file(resample_vectorize_file(f'{DATA_DIR}/{file}', file), file)
         print('Written to file.\n')
 
 if __name__ == '__main__':
