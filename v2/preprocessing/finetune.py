@@ -51,7 +51,7 @@ def finetune_models(dataset: str) -> None:
         write_to_file(finetune(temp_df), dataset[:-4], split)
 
 def main():
-    datasets = ['antisemitism_two.csv', 'antisemitism_four.csv', 'antisemitism_five.csv']
+    datasets = [file for file in os.listdir(DATA_DIR) if file.endswith('.csv')]
     for dataset in datasets:
         finetune_models(dataset)
 
