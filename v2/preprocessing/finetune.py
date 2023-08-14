@@ -39,7 +39,7 @@ def finetune(df: pd.DataFrame) -> dict[int, transformers.Trainer]:
 def write_to_file(trainers: dict[int, transformers.Trainer], dataset: str, split: int) -> None:
     '''Write a finetuned model to file'''
     for trainer in trainers:
-        trainers[trainer].save_model(f'{OUTPUT_DIR}/{dataset}/{dataset}-{split}-{trainer}')
+        trainers[trainer].save_model(f'{OUTPUT_DIR}/{dataset}/{dataset}-{split}-{int(trainer)}')
 
 def finetune_models(dataset: str) -> None:
     '''Finetune models on all splits and write to file'''
@@ -51,7 +51,7 @@ def finetune_models(dataset: str) -> None:
         write_to_file(finetune(temp_df), dataset[:-4], split)
 
 def main():
-    datasets = [file for file in os.listdir(DATA_DIR) if file.endswith('.csv')]
+    datasets = [file for file in os.listdir(DATA_DIR) if file.endswith('.csv') and 'antisemitism' in file]
     for dataset in datasets:
         finetune_models(dataset)
 
