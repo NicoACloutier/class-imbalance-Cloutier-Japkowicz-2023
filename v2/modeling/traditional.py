@@ -66,7 +66,7 @@ def fine_resample(text: list[str], classifications: list[int], id: str) -> tuple
     counts = {key: -(counts[key]-maximum) for key in counts}
     for key in counts:
         temp_text = [item for i, item in enumerate(text) if classifications[i] == key]
-        output_text += [fine_generate(temp_text[random.randint(0, len(temp_text)-1)], id) for _ in range(counts[key])]
+        output_text += [fine_generate(temp_text[random.randint(0, len(temp_text)-1)], f'{id}-{key}') for _ in range(counts[key])]
         output_classes += [key,] * counts[key]
     return output_text, output_classes
 

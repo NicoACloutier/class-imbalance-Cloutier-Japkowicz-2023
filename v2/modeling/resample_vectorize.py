@@ -3,20 +3,20 @@ import numpy as np
 import sys, os, pickle, collections, random, functools, time
 import imblearn, sentence_transformers
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
-from contextlib import contextmanager
 
 DATA_DIR = '../data/cleaned'
 OUTPUT_DIR = 'D:/data'
 INPUT_COLUMN = 'text'
 OUTPUT_COLUMN = 'classification'
 K = 10 #k for k-fold xvalidation
-METHODS = {'none': None,
-           'aug_fine': None,
+METHODS = {'aug_fine': None,
+           'none': None,
            'smote': imblearn.over_sampling.SMOTE, 
            'over': imblearn.over_sampling.RandomOverSampler, 
            'under': imblearn.under_sampling.RandomUnderSampler, 
-           'aug': None,}
-LIMIT = 5000 #upper limit to number of samples in each dataset. Used for testing.
+           'aug': None,
+           }
+LIMIT = 10000000 #upper limit to number of samples in each dataset. Used for testing.
 K_NEIGHBORS = 6 #number of neighbors for SMOTE
 GENERATIVE_LLM_STRING = 'gpt2'
 LLM_INITIALIZER = GPT2LMHeadModel.from_pretrained
@@ -77,7 +77,7 @@ def fine_resample(text: list[str], classifications: list[int], id: str) -> tuple
     counts = {key: -(counts[key]-maximum) for key in counts}
     for key in counts:
         temp_text = [item for i, item in enumerate(text) if classifications[i] == key]
-        output_text += [fine_generate(temp_text[random.randint(0, len(temp_text)-1)], id) for _ in range(counts[key])]
+        output_text += [fine_generate(temp_text[random.randint(0, len(temp_text)-1)], f'{id}-{key}') for _ in range(counts[key])]
         output_classes += [key,] * counts[key]
     return output_text, output_classes
 
