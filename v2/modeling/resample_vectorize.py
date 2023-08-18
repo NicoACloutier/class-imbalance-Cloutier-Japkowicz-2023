@@ -9,7 +9,7 @@ OUTPUT_DIR = 'D:/data'
 INPUT_COLUMN = 'text'
 OUTPUT_COLUMN = 'classification'
 K = 10 #k for k-fold xvalidation
-METHODS = {#'aug_fine': None,
+METHODS = {'aug_fine': None,
            'none': None,
            'smote': imblearn.over_sampling.SMOTE, 
            'over': imblearn.over_sampling.RandomOverSampler, 
@@ -210,7 +210,7 @@ def write_to_file(arrays: list[tuple[list[tuple[np.ndarray, np.ndarray]], list[t
                 pickle.dump(test_array[1], f)
 
 def main():
-    files = [file for file in os.listdir(DATA_DIR) if file.endswith('.csv') and 'news' in file]
+    files = [file for file in os.listdir(DATA_DIR) if file.endswith('.csv')]
     for file in files:
         vectorized = resample_vectorize_file(f'{DATA_DIR}/{file}', file)
         try:

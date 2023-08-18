@@ -6,16 +6,16 @@ import numpy as np
 DATA_DIR = 'D:/data'
 K = 10
 CLASSIFIERS = {'dtree': tree.DecisionTreeClassifier}
-METHODS = ['none', 'over', 'under', 'smote', 'aug']
+METHODS = ['none', 'over', 'under', 'smote', 'aug', 'aug_fine']
 MODELS = ['xlm-roberta-base', 'bert-base-uncased',]
-DATASETS = [#'antisemitism_two', 
-            #'antisemitism_four', 
-            #'antisemitism_five',  
-            #'disaster', 
-            #'website', 
-            #'clothing_rating', 
-            #'clothing_topic', 
-            #'cyberbullying',
+DATASETS = ['antisemitism_two', 
+            'antisemitism_four', 
+            'antisemitism_five',  
+            'disaster', 
+            'website', 
+            'clothing_rating', 
+            'clothing_topic', 
+            'cyberbullying',
             'news_mild_multi',
             'news_mild_two',
             'news_multi',
