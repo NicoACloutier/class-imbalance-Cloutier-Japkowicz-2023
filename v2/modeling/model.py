@@ -5,17 +5,23 @@ import numpy as np
 
 DATA_DIR = 'D:/data'
 K = 10
-CLASSIFIERS = {'dtree': tree.DecisionTreeClassifier, 'svm': svm.SVC, 'nb': naive_bayes.GaussianNB}
-METHODS = ['none', 'smote', 'over', 'under', 'aug', 'aug_fine']
+CLASSIFIERS = {'dtree': tree.DecisionTreeClassifier}
+METHODS = ['none', 'over', 'under', 'smote', 'aug']
 MODELS = ['xlm-roberta-base', 'bert-base-uncased',]
-DATASETS = ['antisemitism_two', 
-            'antisemitism_four', 
-            'antisemitism_five',  
-            'disaster', 
-            'website', 
-            'clothing_rating', 
-            'clothing_topic', 
-            'cyberbullying',
+DATASETS = [#'antisemitism_two', 
+            #'antisemitism_four', 
+            #'antisemitism_five',  
+            #'disaster', 
+            #'website', 
+            #'clothing_rating', 
+            #'clothing_topic', 
+            #'cyberbullying',
+            'news_mild_multi',
+            'news_mild_two',
+            'news_multi',
+            'news_semi_multi',
+            'news_severe_multi',
+            'news_severe_two',
             ]
 
 def read_files(data_dir: str, method_name: str, model_name: str, dataset: str) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -61,7 +67,7 @@ def main():
     for method in METHODS:
         for model in MODELS:
             for classifier in CLASSIFIERS:
-                for dataset in [dataset for dataset in DATASETS]:
+                for dataset in DATASETS:
                     start = time.time()
                     write_to_file(model_dataset(method, model, dataset, CLASSIFIERS[classifier]), f'{DATA_DIR}/{method}/{model}/predictions-{dataset}-{classifier}')
                     end = time.time()

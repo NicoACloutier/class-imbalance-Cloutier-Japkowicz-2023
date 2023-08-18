@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import sys, os, pickle, collections, random, functools, time
-import imblearn, sentence_transformers
+import imblearn, sentence_transformers, pathlib
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
 
 DATA_DIR = '../data/cleaned'
@@ -9,7 +9,7 @@ OUTPUT_DIR = 'D:/data'
 INPUT_COLUMN = 'text'
 OUTPUT_COLUMN = 'classification'
 K = 10 #k for k-fold xvalidation
-METHODS = {'aug_fine': None,
+METHODS = {#'aug_fine': None,
            'none': None,
            'smote': imblearn.over_sampling.SMOTE, 
            'over': imblearn.over_sampling.RandomOverSampler, 
@@ -48,10 +48,10 @@ def generate(text: str) -> str:
     return text
 
 @functools.cache
-def fine_generate(text: str, id: str) -> str:
+def fine_generate(text: str, id_str: str) -> str:
     '''Perform the generative LLM text generation with a fine-tuned model.'''
     tokenized = GENERATIVE_LLM_TOKENIZER.encode(text, max_length=15, truncation=True, return_tensors='pt')
-    generation = fine_models[id].generate(tokenized, max_length=25, do_sample=True, length_penalty=1, 
+    generation = fine_models[id_str].generate(tokenized, max_length=25, do_sample=True, length_penalty=1, 
                                 temperature=random.random()*3, top_k=5, pad_token_id=GENERATIVE_LLM_TOKENIZER.eos_token_id)
     text = GENERATIVE_LLM_TOKENIZER.decode(generation[0], skip_special_tokens=True)
     text = text.replace('\n', ' ')
@@ -69,16 +69,22 @@ def aug_resample(text: list[str], classifications: list[int]) -> tuple[list[str]
         output_classes += [key,] * counts[key]
     return output_text, output_classes
 
-def fine_resample(text: list[str], classifications: list[int], id: str) -> tuple[list[str], list[int]]:
+def fine_resample(text: list[str], classifications: list[int], name: str, i: int) -> tuple[list[str], list[int]]:
     '''Perform fine-tuned augmented LLM resampling given a list of inputs and outputs.'''
     output_text, output_classes = text.copy(), classifications.copy()
     counts = collections.Counter(classifications)
     maximum = max(counts.values())
     counts = {key: -(counts[key]-maximum) for key in counts}
     for key in counts:
-        temp_text = [item for i, item in enumerate(text) if classifications[i] == key]
-        output_text += [fine_generate(temp_text[random.randint(0, len(temp_text)-1)], f'{id}-{key}') for _ in range(counts[key])]
-        output_classes += [key,] * counts[key]
+        try:
+            model = LLM_INITIALIZER(f'{MODEL_DIR}/{name}/{name}-{i}-{int(key)}')
+            fine_models[f'{name}-{i}-{int(key)}'] = model
+            temp_text = [item for i, item in enumerate(text) if classifications[i] == key]
+            output_text += [fine_generate(temp_text[random.randint(0, len(temp_text)-1)], f'{name}-{i}-{int(key)}') for _ in range(counts[key])]
+            output_classes += [key,] * counts[key]
+            del fine_models[f'{name}-{i}-{int(key)}']
+        except OSError: #majority class, not in the thing
+            continue
     return output_text, output_classes
 
 def just_vectorize(df: pd.DataFrame, method: str, name: str) -> tuple[list[tuple[np.ndarray, np.ndarray]], list[tuple[np.ndarray, np.ndarray]]]: #I apologize for this return type
@@ -110,11 +116,9 @@ def aug_fine_resample_vectorize(df: pd.DataFrame, method: str, name: str) -> tup
     output_tests = []
     jump = len(trains[0][0]) // K
     for i, (inputs, outputs) in enumerate(trains):
-        model = LLM_INITIALIZER(f'{MODEL_DIR}/{name}/{name}-{i}')
-        fine_models[f'{name}-{i}'] = model
         spliced_inputs = [inputs[i*jump:(i+1)*jump] for i in range(K)]
         spliced_outputs = [outputs[i*jump:(i+1)*jump] for i in range(K)]
-        tuple_list = [fine_resample(spliced_input, spliced_output, f'{name}-{i}') for spliced_input, spliced_output in zip(spliced_inputs, spliced_outputs)]
+        tuple_list = [fine_resample(spliced_input, spliced_output, name, int(i)) for spliced_input, spliced_output in zip(spliced_inputs, spliced_outputs)]
         all_inputs, all_outputs = [], []
         for temp_tuple_list in tuple_list:
             all_inputs += temp_tuple_list[0]
@@ -122,7 +126,11 @@ def aug_fine_resample_vectorize(df: pd.DataFrame, method: str, name: str) -> tup
         all_inputs = encode_text(LLMS[i], all_inputs)
         output_trains.append((all_inputs, np.array(all_outputs)))
         output_tests.append((encode_text(LLMS[i], tests[i][0]), tests[i][1]))
-        del fine_models[f'{name}-{i}']
+        for j in range(K):
+            try:
+                del fine_models[f'{name}-{i}-{int(j)}']
+            except KeyError:
+                continue
     return output_trains, output_tests
 
 def aug_resample_vectorize(df: pd.DataFrame, method: str, name: str) -> tuple[list[tuple[np.ndarray, np.ndarray]], list[tuple[np.ndarray, np.ndarray]]]:
@@ -180,7 +188,7 @@ def resample_vectorize_file(filename: str, name: str) -> list[tuple[list[tuple[n
         print(f'Finished {resampling_method} method on {filename} dataset in {end-start:.2f} seconds.', end=' ')
     return outputs
 
-def write_to_file(arrays: list[tuple[list[tuple[np.ndarray, np.ndarray]], list[tuple[np.ndarray, np.ndarray]]]], filename: str) -> None:
+def write_to_file(arrays: list[tuple[list[tuple[np.ndarray, np.ndarray]], list[tuple[np.ndarray, np.ndarray]]]], filename: str, output_dir: str) -> None:
     '''
     Write a list of lists of vectorized and resampled data to files.
     The first dimension corresponds to a resampling method, the second to an LLM, and the third to a dataset.
@@ -189,20 +197,27 @@ def write_to_file(arrays: list[tuple[list[tuple[np.ndarray, np.ndarray]], list[t
     for method_index, resampling_method_arrays in enumerate(arrays):
         trains, tests = resampling_method_arrays
         for model_index, (train_array, test_array) in enumerate(zip(trains, tests)):
-            with open(f'{OUTPUT_DIR}/{method_strings[method_index]}/{LLMS[model_index]}/train-input-{filename[:-4]}', 'wb') as f:
+            pathlib.Path(f'{output_dir}/{method_strings[method_index]}/{LLMS[model_index]}').mkdir(parents=True, exist_ok=True)
+            
+            with open(f'{output_dir}/{method_strings[method_index]}/{LLMS[model_index]}/train-input-{filename[:-4]}', 'wb') as f:
                 pickle.dump(train_array[0], f)
-            with open(f'{OUTPUT_DIR}/{method_strings[method_index]}/{LLMS[model_index]}/train-output-{filename[:-4]}', 'wb') as f:
+            with open(f'{output_dir}/{method_strings[method_index]}/{LLMS[model_index]}/train-output-{filename[:-4]}', 'wb') as f:
                 pickle.dump(train_array[1], f)
 
-            with open(f'{OUTPUT_DIR}/{method_strings[method_index]}/{LLMS[model_index]}/test-input-{filename[:-4]}', 'wb') as f:
+            with open(f'{output_dir}/{method_strings[method_index]}/{LLMS[model_index]}/test-input-{filename[:-4]}', 'wb') as f:
                 pickle.dump(test_array[0], f)
-            with open(f'{OUTPUT_DIR}/{method_strings[method_index]}/{LLMS[model_index]}/test-output-{filename[:-4]}', 'wb') as f:
+            with open(f'{output_dir}/{method_strings[method_index]}/{LLMS[model_index]}/test-output-{filename[:-4]}', 'wb') as f:
                 pickle.dump(test_array[1], f)
 
 def main():
-    files = [file for file in os.listdir(DATA_DIR) if file.endswith('.csv')]
+    files = [file for file in os.listdir(DATA_DIR) if file.endswith('.csv') and 'news' in file]
     for file in files:
-        write_to_file(resample_vectorize_file(f'{DATA_DIR}/{file}', file), file)
+        vectorized = resample_vectorize_file(f'{DATA_DIR}/{file}', file)
+        try:
+            write_to_file(vectorized, file, OUTPUT_DIR)
+        except FileNotFoundError:
+            output_dir = '.'
+            write_to_file(vectorized, file, '.')
         print('Written to file.\n')
 
 if __name__ == '__main__':
