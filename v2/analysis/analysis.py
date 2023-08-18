@@ -9,7 +9,7 @@ import pandas as pd
 DATA_DIR = 'D:/data'
 K = 10
 METHODS = ['none', 'smote', 'over', 'under', 'aug', 'aug_fine']
-CLASSIFIERS = ['dtree', 'nb', 'svm',]
+CLASSIFIERS = ['dtree']
 MODELS = ['xlm-roberta-base', 'bert-base-uncased',]
 DATASETS = ['antisemitism_two', 
             'antisemitism_four', 
@@ -19,8 +19,14 @@ DATASETS = ['antisemitism_two',
             'clothing_rating', 
             'clothing_topic', 
             'cyberbullying',
+            'news_mild_multi',
+            'news_mild_two',
+            'news_multi',
+            'news_semi_multi',
+            'news_severe_multi',
+            'news_severe_two',
             ]
-METRICS = [metrics.f1_score,]#metrics.balanced_accuracy_score]
+METRICS = [metrics.f1_score,] #metrics.balanced_accuracy_score]
 
 #Analysis helper functions
 def open_analyze_file(method: str, model: str, dataset: str, metric: typing.Callable, classifier: str) -> float:
@@ -53,6 +59,7 @@ def main():
                 df.loc['highest'] = df.apply('idxmax', axis=0)
                 print(metric)
                 print(df)
+                df.to_csv(f'output/{model}-{classifier}.csv')
                 print('\n\n')
 
 if __name__ == '__main__':
