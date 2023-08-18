@@ -15,9 +15,8 @@ MODEL_INITIALIZER = AutoModelForCausalLM.from_pretrained
 GENERATIVE_LLM_TOKENIZER = AutoTokenizer.from_pretrained(LLM)
 GENERATIVE_LLM_TOKENIZER.pad_token = GENERATIVE_LLM_TOKENIZER.eos_token
 
-def finetune(df: pd.DataFrame) -> dict[int, transformers.Trainer]:
-    '''Finetune a single split of a df'''
-    output_dict = dict()
+def finetune(df: pd.DataFrame, dataset_name: str, split: int) -> None:
+    '''Finetune a single split of a df and write to file.'''
     num_epochs = 3 if len(df) < 2000 else 1
     counter = collections.Counter(df[OUTPUT_COLUMN])
     for key in [key for key in counter if counter[key] != max(counter.values())]:
@@ -28,18 +27,11 @@ def finetune(df: pd.DataFrame) -> dict[int, transformers.Trainer]:
         
         train_args = TrainingArguments(
             f'{OUTPUT_DIR}/saves/', overwrite_output_dir=True,
-            learning_rate=LR, weight_decay=0.01, save_strategy='epoch', save_steps=200, 
+            learning_rate=LR, weight_decay=0.01, save_strategy='no', save_steps=200, 
             report_to=None, logging_steps=50, remove_unused_columns=False, num_train_epochs=num_epochs)
         trainer = Trainer(model=model, args=train_args, train_dataset=dataset, data_collator=collator,)
         trainer.train()
-        output_dict[key] = trainer
-    
-    return output_dict
-
-def write_to_file(trainers: dict[int, transformers.Trainer], dataset: str, split: int) -> None:
-    '''Write a finetuned model to file'''
-    for trainer in trainers:
-        trainers[trainer].save_model(f'{OUTPUT_DIR}/{dataset}/{dataset}-{split}-{int(trainer)}')
+        trainer.save_model(f'{OUTPUT_DIR}/{dataset_name}/{dataset_name}-{split}-{int(key)}')
 
 def finetune_models(dataset: str) -> None:
     '''Finetune models on all splits and write to file'''
@@ -47,11 +39,10 @@ def finetune_models(dataset: str) -> None:
     df[INPUT_COLUMN] = df[INPUT_COLUMN].astype(str)
     jump = len(df) // K
     for split in range(K):
-        temp_df = df.drop(range(split*jump, (split+1)*jump))
-        write_to_file(finetune(temp_df), dataset[:-4], split)
+        finetune(df.iloc[split*jump:(split+1)*jump], dataset[:-4], split)
 
 def main():
-    datasets = [file for file in os.listdir(DATA_DIR) if file.endswith('.csv') and 'antisemitism' in file]
+    datasets = [file for file in os.listdir(DATA_DIR) if file.endswith('.csv')]
     for dataset in datasets:
         finetune_models(dataset)
 
