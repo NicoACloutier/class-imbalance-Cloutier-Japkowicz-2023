@@ -9,20 +9,23 @@ OUTPUT_DIR = 'D:/data'
 INPUT_COLUMN = 'text'
 OUTPUT_COLUMN = 'classification'
 K = 10 #k for k-fold xvalidation
-METHODS = {'aug_fine': None,
-           'none': None,
+METHODS = {'none': None,
+           'aug_fine': None,
+           'border': imblearn.over_sampling.BorderlineSMOTE,
+           'cnn': imblearn.under_sampling.CondensedNearestNeighbour,
            'smote': imblearn.over_sampling.SMOTE, 
            'over': imblearn.over_sampling.RandomOverSampler, 
            'under': imblearn.under_sampling.RandomUnderSampler, 
            'aug': None,
            }
+ADD_METHODS = ['svm', 'border', 'smote'] #methods that require a particular number of samples per fold
 LIMIT = 10000000 #upper limit to number of samples in each dataset. Used for testing.
 K_NEIGHBORS = 6 #number of neighbors for SMOTE
 GENERATIVE_LLM_STRING = 'gpt2'
 LLM_INITIALIZER = GPT2LMHeadModel.from_pretrained
 GENERATIVE_LLM_MODEL = LLM_INITIALIZER('gpt2')
 GENERATIVE_LLM_TOKENIZER = GPT2Tokenizer.from_pretrained('gpt2')
-LLMS = ['xlm-roberta-base', 'bert-base-uncased',]
+LLMS = ['bert-base-uncased',]
 MODEL_DIR = f'D:/models/{GENERATIVE_LLM_STRING}'
 models = [sentence_transformers.SentenceTransformer(path) for path in LLMS]
 model_dict = {LLMS[i]: model for i, model in enumerate(models)}
@@ -93,9 +96,9 @@ def just_vectorize(df: pd.DataFrame, method: str, name: str) -> tuple[list[tuple
     arrays = [(encode_text(model, text), df[OUTPUT_COLUMN].to_numpy()) for model in model_dict]
     return arrays, arrays.copy()
 
-def smote_resample(inputs: np.ndarray, outputs: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    '''Resample with SMOTE.'''
-    resampler = METHODS['smote']()
+def add_resample(inputs: np.ndarray, outputs: np.ndarray, method: str) -> tuple[np.ndarray, np.ndarray]:
+    '''Add samples with ROS, then perform method oversampling.'''
+    resampler = METHODS[method]()
     try:
         return resampler.fit_resample(inputs, outputs)
     except ValueError: #if the number in a particular class is not enough, random resample until it has the proper number
@@ -161,7 +164,7 @@ def vectorize_resample(df: pd.DataFrame, method: str, name: str) -> tuple[list[t
     for inputs, outputs in trains:
         spliced_inputs = [inputs[i*jump:(i+1)*jump] for i in range(K)]
         spliced_outputs = [outputs[i*jump:(i+1)*jump] for i in range(K)]
-        tuple_list = [smote_resample(spliced_input, spliced_output) if method == 'smote' else METHODS[method]().fit_resample(spliced_input, 
+        tuple_list = [add_resample(spliced_input, spliced_output, method) if method in ADD_METHODS else METHODS[method]().fit_resample(spliced_input, 
                                                                             spliced_output) for (spliced_input, 
                                                                             spliced_output) in zip(spliced_inputs, spliced_outputs)]
         all_inputs, all_outputs = tuple_list[0][0], tuple_list[0][1]
@@ -216,7 +219,6 @@ def main():
         try:
             write_to_file(vectorized, file, OUTPUT_DIR)
         except FileNotFoundError:
-            output_dir = '.'
             write_to_file(vectorized, file, '.')
         print('Written to file.\n')
 

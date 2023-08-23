@@ -8,9 +8,9 @@ import pandas as pd
 #Constants and global variables
 DATA_DIR = 'D:/data'
 K = 10
-METHODS = ['none', 'smote', 'over', 'under', 'aug', 'aug_fine']
+METHODS = ['none', 'cnn', 'border', 'smote', 'over', 'under', 'aug', 'aug_fine']
 CLASSIFIERS = ['dtree']
-MODELS = ['xlm-roberta-base', 'bert-base-uncased',]
+MODELS = ['bert-base-uncased',]
 DATASETS = ['antisemitism_two', 
             'antisemitism_four', 
             'antisemitism_five',  
