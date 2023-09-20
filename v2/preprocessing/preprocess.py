@@ -22,7 +22,7 @@ def clean(text: str) -> str:
     return text if len(text) <= MAX_TEXT_LENGTH else text[:MAX_TEXT_LENGTH]
 
 def main():
-    files = os.listdir(RAW_DATA_DIR)
+    files = [file for file in os.listdir(RAW_DATA_DIR) if file.endswith('.csv')]
     for file in files:
         df = pd.read_csv(f'{RAW_DATA_DIR}/{file}')
         df = df.dropna()

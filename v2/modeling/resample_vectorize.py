@@ -9,9 +9,9 @@ OUTPUT_DIR = 'D:/data'
 INPUT_COLUMN = 'text'
 OUTPUT_COLUMN = 'classification'
 K = 10 #k for k-fold xvalidation
-METHODS = {'none': None,
+METHODS = {'border': imblearn.over_sampling.BorderlineSMOTE,
+           'none': None,
            'aug_fine': None,
-           'border': imblearn.over_sampling.BorderlineSMOTE,
            'cnn': imblearn.under_sampling.CondensedNearestNeighbour,
            'smote': imblearn.over_sampling.SMOTE, 
            'over': imblearn.over_sampling.RandomOverSampler, 
@@ -34,7 +34,8 @@ fine_models = dict() #dict used to save fine-tuned models
 @functools.cache
 def encode_sentence(name: str, sentence: str) -> np.ndarray:
     '''Encode a single sentence.'''
-    return model_dict[name].encode(sentence)
+    embed = model_dict[name].encode(sentence)
+    return embed.reshape(1, len(embed))
 
 def encode_text(name: str, text: list[str]) -> np.ndarray:
     '''Encode a corpus with a sentence transformer.'''
@@ -164,6 +165,10 @@ def vectorize_resample(df: pd.DataFrame, method: str, name: str) -> tuple[list[t
     for inputs, outputs in trains:
         spliced_inputs = [inputs[i*jump:(i+1)*jump] for i in range(K)]
         spliced_outputs = [outputs[i*jump:(i+1)*jump] for i in range(K)]
+        for i, inputs in enumerate(spliced_inputs):
+            if len(inputs.shape) == 3:
+                inputs = inputs.reshape(inputs.shape[0], inputs.shape[2])
+            spliced_inputs[i] = inputs
         tuple_list = [add_resample(spliced_input, spliced_output, method) if method in ADD_METHODS else METHODS[method]().fit_resample(spliced_input, 
                                                                             spliced_output) for (spliced_input, 
                                                                             spliced_output) in zip(spliced_inputs, spliced_outputs)]
