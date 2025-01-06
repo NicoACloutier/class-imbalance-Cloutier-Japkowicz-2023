@@ -122,7 +122,7 @@ def aug_fine_resample_vectorize(df: pd.DataFrame, method: str, name: str) -> tup
     for i, (inputs, outputs) in enumerate(trains):
         spliced_inputs = [inputs[i*jump:(i+1)*jump] for i in range(K)]
         spliced_outputs = [outputs[i*jump:(i+1)*jump] for i in range(K)]
-        tuple_list = [fine_resample(spliced_input, spliced_output, name, int(i)) for spliced_input, spliced_output in zip(spliced_inputs, spliced_outputs)]
+        tuple_list = [fine_resample(spliced_input, spliced_output, name, j) for j, (spliced_input, spliced_output) in enumerate(zip(spliced_inputs, spliced_outputs))]
         all_inputs, all_outputs = [], []
         for temp_tuple_list in tuple_list:
             all_inputs += temp_tuple_list[0]
